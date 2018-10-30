@@ -41,6 +41,16 @@ app.get('/json/links/vertex/', function(req, res) {
                               });
 })
 
+app.get('/json/links/edge/', function(req, res) {
+  linkFetcher.fetchLinksEdgeGSI20(req.query.latstart, 
+                              req.query.lngstart, 
+                              req.query.latend, 
+                              req.query.lngend, 
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
