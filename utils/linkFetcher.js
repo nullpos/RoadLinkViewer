@@ -29,7 +29,7 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += '  AND   LINKS1.NUM > LINKS2.NUM  ';
   query += '  AND   LINKS1.LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
   query += '  AND   LINKS1.LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
-  console.log(query);
+  // console.log(query);
   return query;
 }
 
