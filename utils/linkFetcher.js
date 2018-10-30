@@ -19,7 +19,8 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
 
   let query = '';
   query += 'SELECT  LINKS1.LINK_ID AS LINK_ID, ';
-	query += '        LINKS1.NUM AS CONSTITUTION_LINK_ID, ';
+  query += '        LINKS1.NUM AS NUM1, ';
+  query += '        LINKS2.NUM AS NUM2, ';
 	query	+= '        LINKS1.LATITUDE AS LATITUDE1, ';
 	query	+= '        LINKS1.LONGITUDE AS LONGITUDE1, ';
 	query += '        LINKS2.LATITUDE AS LATITUDE2, ';
@@ -29,6 +30,7 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += 'WHERE   LINKS1.NUM - LINKS2.NUM = 1 ';
   query += '  AND   LINKS1.NUM > LINKS2.NUM  ';
   query += '  AND   LINKS1.SCALE = LINKS2.SCALE ';
+  query += '  AND   LINKS1.SCALE = 25000 ';
   query += '  AND   LINKS1.LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
   query += '  AND   LINKS1.LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
   // console.log(query);

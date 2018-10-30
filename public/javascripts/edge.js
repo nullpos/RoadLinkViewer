@@ -42,8 +42,13 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
     edges = new Array();
 
     data.forEach(function(record) {
+      let popupContent = '<div class=\"popupText\">';
+      for (key in record) {
+        popupContent += '' + key + ': ' + record[key] + '<br>';
+      }
+      popupContent += '</div>';
       let popup = L.popup()
-                    .setContent(record.LINK_ID);
+                    .setContent(popupContent);
 
       let edge = L.polyline([[record.LATITUDE1, record.LONGITUDE1], 
                                   [record.LATITUDE2, record.LONGITUDE2]], {
@@ -70,8 +75,14 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
       map.removeLayer(vertex);
     });
     data.forEach(function(record) {
+      let popupContent = '<div class=\"popupText\">';
+      for (key in record) {
+        popupContent += '' + key + ': ' + record[key] + '<br>';
+      }
+      popupContent += '</div>';
+
       let popup = L.popup()
-                    .setContent(record.LINK_ID);
+                    .setContent(popupContent);
       let markerColor;
       if (record.NODE) {
         markerColor = '#FF0000';
