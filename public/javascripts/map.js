@@ -26,7 +26,7 @@ $(document).ready(function() {
 });
 
 function drawLinks(map, markers, latStart, lngStart, latEnd, lngEnd) {
-  let requestUrl = '/json/links/?';
+  let requestUrl = '/json/links/vertex/?';
   requestUrl += 'latstart=' + latStart;
   requestUrl += '&lngstart=' + lngStart;
   requestUrl += '&latend=' + latEnd;
