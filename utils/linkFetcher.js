@@ -20,7 +20,7 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += 'SELECT  LINKS1.LINK_ID AS LINK_ID, ';
 	query += '        LINKS1.NUM AS CONSTITUTION_LINK_ID, ';
 	query	+= '        LINKS1.LATITUDE AS LATITUDE1, ';
-	query	+= '        LINKS1.LONGITUDE AS LOGITUDE1, ';
+	query	+= '        LINKS1.LONGITUDE AS LONGITUDE1, ';
 	query += '        LINKS2.LATITUDE AS LATITUDE2, ';
 	query += '        LINKS2.LONGITUDE AS LONGITUDE2 ';
   query += 'FROM    LINKS_GSI20 AS LINKS1 ';
