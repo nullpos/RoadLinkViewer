@@ -30,6 +30,12 @@ app.get('/', function(req, res) {
   });
 });
 
+app.get('/edge/', function(req, res) {
+  res.render('edge', {
+    title: 'RoadEdgeViewer'
+  });
+})
+
 app.get('/json/links/vertex/', function(req, res) {
   console.log(req.query.latstart + ',' + req.query.lngstart + ',' + req.query.latend + ',' + req.query.lngend);
   linkFetcher.fetchLinksGSI20(req.query.latstart, 

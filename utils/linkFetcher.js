@@ -10,6 +10,7 @@ function makeLinkFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += 'FROM LINKS_GSI20 ';
   query += 'WHERE LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
   query += '  AND LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
+  query += '  AND SCALE = 25000 ';
   
   return query;
 }
@@ -27,6 +28,7 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += '  INNER JOIN LINKS_GSI20 AS LINKS2 ON LINKS1.LINK_ID = LINKS2.LINK_ID ';
   query += 'WHERE   LINKS1.NUM - LINKS2.NUM = 1 ';
   query += '  AND   LINKS1.NUM > LINKS2.NUM  ';
+  query += '  AND   LINKS1.SCALE = LINKS2.SCALE ';
   query += '  AND   LINKS1.LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
   query += '  AND   LINKS1.LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
   // console.log(query);
