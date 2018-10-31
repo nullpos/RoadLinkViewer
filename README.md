@@ -19,5 +19,5 @@ Create utils/config.json to access database.
 
 ## Usage
 
-To start app, run `npm start`.
+To start app, run `npm start`.  
 Then access localhost:3000/ or localhost:3000/edge/ with Google Chrome.
