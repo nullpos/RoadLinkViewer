@@ -1,7 +1,7 @@
 $(document).ready(function() {
   let map = L.map('map').setView([43.188627611, 141.008331], 15);
-  let vertices = new Array();
-  let edges = new Array();
+  let vertices = L.layerGroup().addTo(map);
+  let edges = L.layerGroup().addTo(map);
   
 
   L.tileLayer(
@@ -15,7 +15,7 @@ $(document).ready(function() {
   let mapBounds = map.getBounds();
   //console.log(mapBounds);
   drawLinks(map, vertices, edges, mapBounds.getSouth(), mapBounds.getWest(), mapBounds.getNorth(), mapBounds.getEast());
-  $('span#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
+  $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
@@ -23,7 +23,7 @@ $(document).ready(function() {
     if (map.getZoom() >= 15) {
       drawLinks(map, vertices, edges, mapBounds.getSouth(), mapBounds.getWest(), mapBounds.getNorth(), mapBounds.getEast());
     }
-    $('span#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
+    $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
   });
 });
 
@@ -35,11 +35,8 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
   requestEdges += '&lngend=' + lngEnd;
 
   $.getJSON(requestEdges).done(function(data) {
-    console.log(data);
-    edges.forEach(function(edge) {
-      map.removeLayer(edge);
-    });
-    edges = new Array();
+    //console.log(data);
+    edges.clearLayers();
 
     data.forEach(function(record) {
       let popupContent = '<div class=\"popupText\">';
@@ -56,10 +53,16 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
         opacity: 0.3,
         color: '#00FF00'
       })
-      .bindPopup(popup);
+      .bindPopup(popup, {autoClose: false, closeOnClick: false})
+      .on('popupopen', function() {
+        edge.setStyle({color: '#FF0000'});
+      })
+      .on('popupclose', function() {
+        edge.setStyle({color: '#00FF00'});
+      })
 
-      map.addLayer(edge);
-      edges.push(edge);
+      //map.addLayer(edge);
+      edges.addLayer(edge);
     });
   })
 
@@ -71,9 +74,7 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
 
   $.getJSON(requestVertices, function(data) {
     
-    vertices.forEach(function(vertex) {
-      map.removeLayer(vertex);
-    });
+    vertices.clearLayers();
     data.forEach(function(record) {
       let popupContent = '<div class=\"popupText\">';
       for (key in record) {
@@ -97,10 +98,11 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
         fillColor: markerColor,
         fillOpacity: 0.8
       })
-      .bindPopup(popup);
+      .bindPopup(popup, {autoClose: false, closeOnClick: false});
 
-      map.addLayer(vertex);
-      vertices.push(vertex);
+      // map.addLayer(vertex);
+      // vertices.push(vertex);
+      vertices.addLayer(vertex);
     });
   })
 }

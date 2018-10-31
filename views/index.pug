@@ -2,8 +2,10 @@ extends layout
 
 block content
   h1= title
-  span#zoomValue
+  #zoomValue
 
-  #map
+  #mapInfoContainer
+    #map
+    #layersInfo
 
-  script(src='/javascripts/map.js')
+  script(src='/javascripts/edge.js')

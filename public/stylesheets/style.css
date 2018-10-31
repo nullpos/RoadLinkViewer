@@ -14,9 +14,20 @@ a {
   color: #00B7FF;
 }
 
-#map {
-  width: 100%;
+#mapInfoContainer {
   height: 70%;
+}
+
+#map {
+  width: 70%;
+  height: 100%;
+  float: left;
+}
+
+#layersInfo {
+  width: 30%;
+  height: 100%;
+  float: right;
 }
 
 .popupText {
