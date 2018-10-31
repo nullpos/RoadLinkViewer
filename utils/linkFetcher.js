@@ -14,16 +14,19 @@ function makeLinkFetchQuery(latStart, lngStart, latEnd, lngEnd) {
 }
 
 function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
 
   let query = '';
   query += 'SELECT  LINKS1.LINK_ID AS LINK_ID1, ';
-  query += '        LINKS2.LINK_ID AS LINK_ID2, ';
+  //query += '        LINKS2.LINK_ID AS LINK_ID2, ';
   query += '        LINKS1.NUM AS NUM1, ';
   query += '        LINKS2.NUM AS NUM2, ';
 	query	+= '        LINKS1.LATITUDE AS LATITUDE1, ';
 	query	+= '        LINKS1.LONGITUDE AS LONGITUDE1, ';
 	query += '        LINKS2.LATITUDE AS LATITUDE2, ';
   query += '        LINKS2.LONGITUDE AS LONGITUDE2, ';
+  query += '        LINKS1.SCALE AS SCALE, ';
   query += '        LINKS1.NODE AS NODE1, ';
   query += '        LINKS2.NODE AS NODE2 ';
   query += 'FROM    LINKS_GSI20 AS LINKS1 ';
@@ -31,8 +34,8 @@ function makeLinkEdgeFetchQuery(latStart, lngStart, latEnd, lngEnd) {
   query += 'WHERE   LINKS1.NUM - LINKS2.NUM = 1 ';
   query += '  AND   LINKS1.NUM > LINKS2.NUM  ';
   query += '  AND   LINKS1.SCALE = LINKS2.SCALE ';
-  query += '  AND   LINKS1.LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
-  query += '  AND   LINKS1.LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
+  query += '  AND   LINKS1.LATITUDE ' + latBetweenStmt + ' ';
+  query += '  AND   LINKS1.LONGITUDE ' + lngBetweenStmt + ' ';
   // console.log(query);
   return query;
 }
