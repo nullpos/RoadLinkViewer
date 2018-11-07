@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  let map = L.map('map').setView([43.188627611, 141.008331], 15);
+  let map = L.map('map').setView([43.841666667, 142.786789493], 15);
   let vertices = L.layerGroup().addTo(map);
   let edges = L.layerGroup().addTo(map);
   
@@ -14,14 +14,14 @@ $(document).ready(function() {
 
   let mapBounds = map.getBounds();
   //console.log(mapBounds);
-  drawLinks(map, vertices, edges, mapBounds.getSouth(), mapBounds.getWest(), mapBounds.getNorth(), mapBounds.getEast());
+  drawLinks(map, vertices, edges, mapBounds.getSouth() - 0.05, mapBounds.getWest() - 0.05, mapBounds.getNorth() + 0.05, mapBounds.getEast() + 0.05);
   $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
     //console.log(mapBounds);
     if (map.getZoom() >= 15) {
-      drawLinks(map, vertices, edges, mapBounds.getSouth(), mapBounds.getWest(), mapBounds.getNorth(), mapBounds.getEast());
+      drawLinks(map, vertices, edges, mapBounds.getSouth() - 0.05, mapBounds.getWest() - 0.05, mapBounds.getNorth() + 0.05, mapBounds.getEast() + 0.05);
     }
     $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 15, markers will not be ploted.');
   });
@@ -49,7 +49,7 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
 
       let edge = L.polyline([[record.LATITUDE1, record.LONGITUDE1], 
                                   [record.LATITUDE2, record.LONGITUDE2]], {
-        weight: 3,
+        weight: 5,
         opacity: 0.3,
         color: '#00FF00'
       })
