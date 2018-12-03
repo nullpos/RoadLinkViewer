@@ -3,16 +3,6 @@ let Request = require('tedious').Request;
 let config = require('./config.json');
 let getQueryResult = require('./query.js').getQueryResult;
 
-function makeVertexQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
-  // make query to fetch edges
-  let query = '';
-  query += 'SELECT * ';
-  query += 'FROM LINKS ';
-  query += 'WHERE LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
-  query += '  AND LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
-
-  return query;
-}
 
 function makeEdgeQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
   // make query to fetch vertices
@@ -87,13 +77,6 @@ exports.fetchEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback)
   });
 }
 
-exports.fetchVertexLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
-  let querystmt = makeVertexQueryLegacy(latStart, lngStart, latEnd, lngEnd);
-
-  getQueryResult(querystmt, function(result) {
-    callback(result);
-  });
-}
 
 exports.fetchLinksGSI20 = function(latStart, lngStart, latEnd, lngEnd, callback) {
   let querystmt = makeLinkFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd);

@@ -98,44 +98,4 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
       vertices.addLayer(vertex2);
     });
   })
-
-  // let requestVertices = '/json/legacy/vertex/?';
-  // requestVertices += 'latstart=' + latStart;
-  // requestVertices += '&lngstart=' + lngStart;
-  // requestVertices += '&latend=' + latEnd;
-  // requestVertices += '&lngend=' + lngEnd;
-
-  // $.getJSON(requestVertices, function(data) {
-    
-  //   vertices.clearLayers();
-  //   data.forEach(function(record) {
-  //     let popupContent = '<div class=\"popupText\">';
-  //     for (key in record) {
-  //       popupContent += '' + key + ': ' + record[key] + '<br>';
-  //     }
-  //     popupContent += '</div>';
-
-  //     let popup = L.popup()
-  //                   .setContent(popupContent);
-  //     let markerColor;
-  //     if (record.NODE) {
-  //       markerColor = '#FF0000';
-  //     } else {
-  //       markerColor = '#3366ff';
-  //     }
-
-  //     let vertex = L.circleMarker([record.LATITUDE, record.LONGITUDE], {
-  //       radius: 5,
-  //       stroke: false,
-  //       fill: true,
-  //       fillColor: markerColor,
-  //       fillOpacity: 0.8
-  //     })
-  //     .bindPopup(popup, {autoClose: false, closeOnClick: false});
-
-  //     // map.addLayer(vertex);
-  //     // vertices.push(vertex);
-  //     vertices.addLayer(vertex);
-  //   });
-  // })
 }
