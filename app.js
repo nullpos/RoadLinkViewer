@@ -24,6 +24,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 
+app.get('/', function(req, res) {
+  res.render('index', {
+    title: 'RoadLinkViewerIndexPage!'
+  })
+})
+
 app.get('/gsi20', function(req, res) {
   res.render('gsi20', {
     title: 'GSI20Viewer'
