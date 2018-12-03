@@ -30,6 +30,12 @@ app.get('/', function(req, res) {
   })
 })
 
+app.get('/legacy', function(req, res) {
+  res.render('legacy', {
+    title: 'LegacyRoadLinkViewer'
+  });
+});
+
 app.get('/gsi20', function(req, res) {
   res.render('gsi20', {
     title: 'GSI20Viewer'
@@ -40,7 +46,27 @@ app.get('/edge/', function(req, res) {
   res.render('edge', {
     title: 'RoadEdgeViewer'
   });
-})
+});
+
+app.get('/json/legacy/edge/', function(req, res) {
+  linkFetcher.fetchEdgeLegacy(req.query.latstart,
+                              req.query.lngstart,
+                              req.query.latend,
+                              req.query.lngend,
+                              function(ret) {
+                                res.json(ret);
+                              });
+});
+
+app.get('/json/legacy/vertex/', function(req, res) {
+  linkFetcher.fetchVertexLegacy(req.query.latstart,
+                                req.query.lngstart,
+                                req.query.latend,
+                                req.query.lngend,
+                                function(ret) {
+                                  res.json(ret);
+                                });
+});
 
 app.get('/json/gsi20/links/vertex/', function(req, res) {
   console.log(req.query.latstart + ',' + req.query.lngstart + ',' + req.query.latend + ',' + req.query.lngend);

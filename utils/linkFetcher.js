@@ -3,6 +3,42 @@ let Request = require('tedious').Request;
 let config = require('./config.json');
 let getQueryResult = require('./query.js').getQueryResult;
 
+function makeVertexQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
+  // make query to fetch edges
+  let query = '';
+  query += 'SELECT * ';
+  query += 'FROM LINKS ';
+  query += 'WHERE LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
+  query += '  AND LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
+
+  return query;
+}
+
+function makeEdgeQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
+  // make query to fetch vertices
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
+
+  let query = '';
+  query += 'SELECT  LINKS1.LINK_ID AS LINKID, ';
+  query += '        LINKS1.NUM AS NUM1, ';
+  query += '        LINKS2.NUM AS NUM2, ';
+  query += '        LINKS1.LATITUDE AS LATITUDE1, ';
+  query += '        LINKS1.LONGITUDE AS LONGITUDE1, ';
+  query += '        LINKS2.LATITUDE AS LATITUDE2, ';
+  query += '        LINKS2.LONGITUDE AS LONGITUDE2, ';
+  query += '        LINKS1.NODE_ID AS NODE1, ';
+  query += '        LINKS2.NODE_ID AS NODE2 ';
+  query += 'FROM LINKS AS LINKS1 ';
+  query += '  INNER JOIN LINKS AS LINKS2 ON LINKS1.LINK_ID = LINKS2.LINK_ID ';
+  query += 'WHERE   LINKS1.NUM - LINKS2.NUM = 1 ';
+  query += '  AND   LINKS1.NUM > LINKS2.NUM ';
+  query += '  AND   LINKS1.LATITUDE ' + latBetweenStmt + ' ';
+  query += '  AND   LINKS1.LONGITUDE ' + lngBetweenStmt + ' ';
+
+  return query;
+}
+
 function makeLinkFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   // make query to get link.
 
@@ -41,6 +77,22 @@ function makeLinkEdgeFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   // query += '  AND   LINKS1.SCALE = 25000 '
   // console.log(query);
   return query;
+}
+
+exports.fetchEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeEdgeQueryLegacy(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+    callback(result);
+  });
+}
+
+exports.fetchVertexLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeVertexQueryLegacy(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+    callback(result);
+  });
 }
 
 exports.fetchLinksGSI20 = function(latStart, lngStart, latEnd, lngEnd, callback) {
