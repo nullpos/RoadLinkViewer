@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  let map = L.map('map').setView([35.3973359,139.4651749], 18);
+  let map = L.map('map').setView([35.3973359,139.4651749], 17);
   let vertices = L.layerGroup().addTo(map);
   let edges = L.layerGroup().addTo(map);
 
@@ -16,15 +16,15 @@ $(document).ready(function() {
   let mapBounds = map.getBounds();
   //console.log(mapBounds);
   drawLinks(map, vertices, edges, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
-  $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 18, markers will not be ploted.');
+  $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
     //console.log(mapBounds);
-    if (map.getZoom() >= 18) {
-      drawLinks(map, vertices, edges, mapBounds.getSouth() - 0.01, mapBounds.getWest() - 0.01, mapBounds.getNorth() + 0.01, mapBounds.getEast() + 0.01);
+    if (map.getZoom() >= 17) {
+      drawLinks(map, vertices, edges, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
     }
-    $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 18, markers will not be ploted.');
+    $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
   });
 });
 
@@ -38,6 +38,7 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
   $.getJSON(requestEdges).done(function(data) {
     //console.log(data);
     edges.clearLayers();
+    vertices.clearLayers();
 
     data.forEach(function(record) {
       let popupContent = '<div class=\"popupText\">';
@@ -64,46 +65,77 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
 
       //map.addLayer(edge);
       edges.addLayer(edge);
-    });
-  })
 
-  let requestVertices = '/json/legacy/vertex/?';
-  requestVertices += 'latstart=' + latStart;
-  requestVertices += '&lngstart=' + lngStart;
-  requestVertices += '&latend=' + latEnd;
-  requestVertices += '&lngend=' + lngEnd;
-
-  $.getJSON(requestVertices, function(data) {
-    
-    vertices.clearLayers();
-    data.forEach(function(record) {
-      let popupContent = '<div class=\"popupText\">';
-      for (key in record) {
-        popupContent += '' + key + ': ' + record[key] + '<br>';
-      }
-      popupContent += '</div>';
-
-      let popup = L.popup()
-                    .setContent(popupContent);
-      let markerColor;
-      if (record.NODE) {
-        markerColor = '#FF0000';
+      let markerColor1;
+      if (record.NODE1) {
+        markerColor1 = '#FF0000';
       } else {
-        markerColor = '#3366ff';
+        markerColor1 = '#3366ff';
       }
-
-      let vertex = L.circleMarker([record.LATITUDE, record.LONGITUDE], {
+      let vertex1 = L.circleMarker([record.LATITUDE1, record.LONGITUDE1], {
         radius: 5,
         stroke: false,
         fill: true,
-        fillColor: markerColor,
-        fillOpacity: 0.8
-      })
-      .bindPopup(popup, {autoClose: false, closeOnClick: false});
+        fillColor: markerColor1,
+        fillOpacity: 0.5
+      });
 
-      // map.addLayer(vertex);
-      // vertices.push(vertex);
-      vertices.addLayer(vertex);
+      let markerColor2;
+      if (record.NODE2) {
+        markerColor2 = '#FF0000';
+      } else {
+        markerColor2 = '#3366ff';
+      }
+      let vertex2 = L.circleMarker([record.LATITUDE2, record.LONGITUDE2], {
+        radius: 5,
+        stroke: false,
+        fill: true,
+        fillColor: markerColor2,
+        fillOpacity: 0.5
+      });
+
+      vertices.addLayer(vertex1);
+      vertices.addLayer(vertex2);
     });
   })
+
+  // let requestVertices = '/json/legacy/vertex/?';
+  // requestVertices += 'latstart=' + latStart;
+  // requestVertices += '&lngstart=' + lngStart;
+  // requestVertices += '&latend=' + latEnd;
+  // requestVertices += '&lngend=' + lngEnd;
+
+  // $.getJSON(requestVertices, function(data) {
+    
+  //   vertices.clearLayers();
+  //   data.forEach(function(record) {
+  //     let popupContent = '<div class=\"popupText\">';
+  //     for (key in record) {
+  //       popupContent += '' + key + ': ' + record[key] + '<br>';
+  //     }
+  //     popupContent += '</div>';
+
+  //     let popup = L.popup()
+  //                   .setContent(popupContent);
+  //     let markerColor;
+  //     if (record.NODE) {
+  //       markerColor = '#FF0000';
+  //     } else {
+  //       markerColor = '#3366ff';
+  //     }
+
+  //     let vertex = L.circleMarker([record.LATITUDE, record.LONGITUDE], {
+  //       radius: 5,
+  //       stroke: false,
+  //       fill: true,
+  //       fillColor: markerColor,
+  //       fillOpacity: 0.8
+  //     })
+  //     .bindPopup(popup, {autoClose: false, closeOnClick: false});
+
+  //     // map.addLayer(vertex);
+  //     // vertices.push(vertex);
+  //     vertices.addLayer(vertex);
+  //   });
+  // })
 }
