@@ -2,6 +2,7 @@ $(document).ready(function() {
   let map = L.map('map').setView([43.841666667, 142.786789493], 15);
   let vertices = L.layerGroup().addTo(map);
   let edges = L.layerGroup().addTo(map);
+
   
 
   L.tileLayer(
@@ -28,7 +29,7 @@ $(document).ready(function() {
 });
 
 function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
-  let requestEdges = '/json/links/edge/?';
+  let requestEdges = '/json/gsi20/links/edge/?';
   requestEdges += 'latstart=' + latStart;
   requestEdges += '&lngstart=' + lngStart;
   requestEdges += '&latend=' + latEnd;
@@ -66,7 +67,7 @@ function drawLinks(map, vertices, edges, latStart, lngStart, latEnd, lngEnd) {
     });
   })
 
-  let requestVertices = '/json/links/vertex/?';
+  let requestVertices = '/json/gsi20/links/vertex/?';
   requestVertices += 'latstart=' + latStart;
   requestVertices += '&lngstart=' + lngStart;
   requestVertices += '&latend=' + latEnd;
