@@ -138,6 +138,8 @@ exports.fetchLineString = function(latStart, lngStart, latEnd, lngEnd, callback)
 
     if (feature) {
       // push last feature.
+      feature.properties = {};
+      feature.properties.linkid = currentLinkId;
       feature.properties.count = count;
       response.features.push(feature);
     }
