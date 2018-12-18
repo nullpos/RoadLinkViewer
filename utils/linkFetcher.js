@@ -29,6 +29,28 @@ function makeEdgeQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
   return query;
 }
 
+function makeLineStringQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
+  // make query to draw polyline.
+  // make query to fetch vertices
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
+
+  let query = '';
+  query += 'SELECT  LINK_ID, ';
+  query += '        NUM, ';
+  query += '        LATITUDE, ';
+  query += '        LONGITUDE ';
+  query += 'FROM    LINKS ';
+  query += 'WHERE   LINK_ID IN ( ';
+  query += '          SELECT  DISTINCT LINK_ID ';
+  query += '          FROM    LINKS ';
+  query += '          WHERE   LATITUDE ' + latBetweenStmt + ' ';
+  query += '            AND   LONGITUDE ' + lngBetweenStmt + ' ';
+  query += '        )';
+  query += 'ORDER BY LINK_ID, NUM';
+  return query;
+}
+
 function makeLinkFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   // make query to get link.
 
@@ -75,6 +97,53 @@ exports.fetchEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback)
   getQueryResult(querystmt, function(result) {
     callback(result);
   });
+}
+
+exports.fetchLineString = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeLineStringQueryLegacy(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+
+    let response = {};
+    response.type = 'FeatureCollection';
+    response.features = [];
+
+    let currentLinkId = null;
+    let feature = {};
+    let count = 0;
+
+    result.forEach(function(record) {
+      if (currentLinkId !== record.LINK_ID) {
+        if (currentLinkId) {
+          // push current lineString.
+          feature.properties.count = count;
+          response.features.push(feature);
+        }
+        // change link.
+        currentLinkId = record.LINK_ID;
+        
+        feature = {};
+        feature.type = 'Feature';
+        feature.geometry = {};
+        feature.geometry.type = 'LineString';
+        feature.geometry.coordinates = [];
+        feature.properties = {};
+        feature.properties.linkid = record.LINK_ID;
+        count = 0;
+      }
+
+      feature.geometry.coordinates.push([record.LATITUDE, record.LONGITUDE]);
+      count++;
+    });
+
+    if (feature) {
+      // push last feature.
+      feature.properties.count = count;
+      response.features.push(feature);
+    }
+
+    callback(response);
+  })
 }
 
 

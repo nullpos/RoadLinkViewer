@@ -42,6 +42,12 @@ app.get('/gsi20', function(req, res) {
   });
 });
 
+app.get('/legacylinestring', function(req, res) {
+  res.render('legacylinestring', {
+    title: 'LegacyLineStrings'
+  });
+});
+
 app.get('/json/legacy/edge/', function(req, res) {
   linkFetcher.fetchEdgeLegacy(req.query.latstart,
                               req.query.lngstart,
@@ -68,6 +74,16 @@ app.get('/json/gsi20/links/edge/', function(req, res) {
                               req.query.lngstart, 
                               req.query.latend, 
                               req.query.lngend, 
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
+app.get('/json/legacy/linestring/', function(req, res) {
+  linkFetcher.fetchLineString(req.query.latstart,
+                              req.query.lngstart,
+                              req.query.latend,
+                              req.query.lngend,
                               function(ret) {
                                 res.json(ret);
                               });
