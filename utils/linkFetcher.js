@@ -91,6 +91,50 @@ function makeLinkEdgeFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   return query;
 }
 
+function makeLineStringGeoJson(orderedLinks) {
+  let response = {};
+  response.type = 'FeatureCollection';
+  response.features = [];
+
+  let currentLinkId = null;
+  let feature = {};
+  let count = 0;
+
+  orderedLinks.forEach(function(record) {
+    if (currentLinkId !== record.LINK_ID) {
+      if (currentLinkId) {
+        // push current lineString.
+        feature.properties.count = count;
+        response.features.push(feature);
+      }
+      // change link.
+      currentLinkId = record.LINK_ID;
+      
+      feature = {};
+      feature.type = 'Feature';
+      feature.geometry = {};
+      feature.geometry.type = 'LineString';
+      feature.geometry.coordinates = [];
+      feature.properties = {};
+      feature.properties.linkid = record.LINK_ID;
+      count = 0;
+    }
+
+    feature.geometry.coordinates.push([record.LATITUDE, record.LONGITUDE]);
+    count++;
+  });
+
+  if (feature) {
+    // push last feature.
+    feature.properties = {};
+    feature.properties.linkid = currentLinkId;
+    feature.properties.count = count;
+    response.features.push(feature);
+  }
+
+  return response;
+}
+
 exports.fetchEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
   let querystmt = makeEdgeQueryLegacy(latStart, lngStart, latEnd, lngEnd);
 
@@ -103,48 +147,7 @@ exports.fetchLineString = function(latStart, lngStart, latEnd, lngEnd, callback)
   let querystmt = makeLineStringQueryLegacy(latStart, lngStart, latEnd, lngEnd);
 
   getQueryResult(querystmt, function(result) {
-
-    let response = {};
-    response.type = 'FeatureCollection';
-    response.features = [];
-
-    let currentLinkId = null;
-    let feature = {};
-    let count = 0;
-
-    result.forEach(function(record) {
-      if (currentLinkId !== record.LINK_ID) {
-        if (currentLinkId) {
-          // push current lineString.
-          feature.properties.count = count;
-          response.features.push(feature);
-        }
-        // change link.
-        currentLinkId = record.LINK_ID;
-        
-        feature = {};
-        feature.type = 'Feature';
-        feature.geometry = {};
-        feature.geometry.type = 'LineString';
-        feature.geometry.coordinates = [];
-        feature.properties = {};
-        feature.properties.linkid = record.LINK_ID;
-        count = 0;
-      }
-
-      feature.geometry.coordinates.push([record.LATITUDE, record.LONGITUDE]);
-      count++;
-    });
-
-    if (feature) {
-      // push last feature.
-      feature.properties = {};
-      feature.properties.linkid = currentLinkId;
-      feature.properties.count = count;
-      response.features.push(feature);
-    }
-
-    callback(response);
+    callback(makeLineStringGeoJson(result));
   })
 }
 
