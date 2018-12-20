@@ -89,6 +89,23 @@ app.get('/json/legacy/linestring/', function(req, res) {
                               });
 })
 
+app.get('/json/legacy/semantics/', function(req, res) {
+  let semanticid = req.query.semanticid;
+  if(!semanticid) {
+    // If semanticid not specified, only links in view will returns.
+    semanticid = -1;
+  }
+
+  linkFetcher.fetchLineStringSemanticAndRectangle(req.query.latstart,
+                                                  req.query.lngstart,
+                                                  req.query.latend,
+                                                  req.query.lngend,
+                                                  semanticid,
+                                                  function(ret) {
+                                                    res.json(ret);
+                                                  });
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

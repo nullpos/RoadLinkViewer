@@ -91,6 +91,33 @@ function makeLinkEdgeFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   return query;
 }
 
+function makeSemanticViewQuery(latStart, lngStart, latEnd, lngEnd, semanticId) {
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
+
+  let query = '';
+  query += 'SELECT  LINK_ID, ';
+  query += '        NUM, ';
+  query += '        LATITUDE, ';
+  query += '        LONGITUDE, ';
+  query += '        (SELECT  CASE COUNT(1) ';
+  query += '                    WHEN 0 THEN 0 ';
+  query += '                    ELSE 1 END ';
+  query += '        FROM     SEMANTIC_LINKS ';
+  query += '        WHERE    l.LINK_ID = SEMANTIC_LINKS.LINK_ID ';
+  query += '          AND    SEMANTIC_LINK_ID = ' + semanticId + ' ';
+  query += '        ) AS IS_SEMANTICS ';
+  query += 'FROM    LINKS AS l ';
+  query += 'WHERE   LINK_ID IN ( ';
+  query += '          SELECT  DISTINCT LINK_ID ';
+  query += '          FROM    LINKS ';
+  query += '          WHERE   (LATITUDE ' + latBetweenStmt + ' AND LONGITUDE ' + lngBetweenStmt + ') ';
+  query += '            OR    (LINK_ID IN (SELECT LINK_ID FROM SEMANTIC_LINKS WHERE SEMANTIC_LINK_ID = ' + semanticId + ')) ';
+  query += '        ) ';
+  query += 'ORDER BY LINK_ID, NUM';
+  return query;
+}
+
 function makeLineStringGeoJson(orderedLinks) {
   let response = {};
   response.type = 'FeatureCollection';
@@ -148,6 +175,55 @@ exports.fetchLineString = function(latStart, lngStart, latEnd, lngEnd, callback)
 
   getQueryResult(querystmt, function(result) {
     callback(makeLineStringGeoJson(result));
+  })
+}
+
+exports.fetchLineStringSemanticAndRectangle = (latStart, lngStart, latEnd, lngEnd, semanticId, callback) => {
+  let querystmt = makeSemanticViewQuery(latStart, lngStart, latEnd, lngEnd, semanticId);
+
+  getQueryResult(querystmt, function(orderedLinks) {
+    let response = {};
+    response.type = 'FeatureCollection';
+    response.features = [];
+  
+    let currentLinkId = null;
+    let feature = {};
+    let count = 0;
+  
+    orderedLinks.forEach(function(record) {
+      if (currentLinkId !== record.LINK_ID) {
+        if (currentLinkId) {
+          // push current lineString.
+          feature.properties.count = count;
+          response.features.push(feature);
+        }
+        // change link.
+        currentLinkId = record.LINK_ID;
+        
+        feature = {};
+        feature.type = 'Feature';
+        feature.geometry = {};
+        feature.geometry.type = 'LineString';
+        feature.geometry.coordinates = [];
+        feature.properties = {};
+        feature.properties.linkid = record.LINK_ID;
+        feature.properties.issemantics = record.IS_SEMANTICS;
+        count = 0;
+      }
+  
+      feature.geometry.coordinates.push([record.LATITUDE, record.LONGITUDE]);
+      count++;
+    });
+  
+    if (feature) {
+      // push last feature.
+      feature.properties = {};
+      feature.properties.linkid = currentLinkId;
+      feature.properties.count = count;
+      response.features.push(feature);
+    }
+
+    callback(response);
   })
 }
 
