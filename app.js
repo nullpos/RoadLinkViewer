@@ -96,6 +96,7 @@ app.get('/json/legacy/semanticlist', (req, res) => {
   });
 });
 
+// sample: /json/legacy/semantics/?latstart=35.3932102722828&lngstart=139.4594814052582&latend=35.401454674824315&lngend=139.47085840797428&semanticid=366
 app.get('/json/legacy/semantics/', function(req, res) {
   let semanticid = req.query.semanticid;
   if(!semanticid) {
