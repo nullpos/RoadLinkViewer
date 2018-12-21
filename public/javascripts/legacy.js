@@ -9,7 +9,7 @@ $(document).ready(function() {
     'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org/">OpenStreetMap</a>',
       minZoom: 8,
-      maxZoom: 20
+      maxZoom: 19
     }
   ).addTo( map );
 
