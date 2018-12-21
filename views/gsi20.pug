@@ -1,11 +1,12 @@
 extends layout
 
+append stylesheet
+  link(rel='stylesheet', href='/stylesheets/fullmap.css')
+
 block content
   h1= title
   #zoomValue
 
-  #mapInfoContainer
-    #map
-    //#layersInfo
+  #map
 
   script(src='/javascripts/edge.js')
