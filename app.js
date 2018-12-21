@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 let linkFetcher = require('./utils/linkFetcher.js');
+let semantics = require('./utils/semantic.js');
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -88,6 +89,12 @@ app.get('/json/legacy/linestring/', function(req, res) {
                                 res.json(ret);
                               });
 })
+
+app.get('/json/legacy/semanticlist', (req, res) => {
+  semantics.fetchSemanticList((ret) => {
+    res.json(ret);
+  });
+});
 
 app.get('/json/legacy/semantics/', function(req, res) {
   let semanticid = req.query.semanticid;
