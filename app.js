@@ -120,6 +120,14 @@ app.get('/json/legacy/semantics/', function(req, res) {
                                                   });
 });
 
+app.post('/methods/createsemantic', (req, res) => {
+  res.status(200).send(req);
+})
+
+app.delete('/methods/deletesemantic', (req, res) => {
+  res.status(200).send(req);
+})
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
