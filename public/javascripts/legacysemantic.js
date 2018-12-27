@@ -13,8 +13,6 @@ $(document).ready(function() {
       maxZoom: 19
     }
   ).addTo( map );
-
-  console.log('?');
   createSemanticPulldown();
 
   let mapBounds = map.getBounds();
@@ -24,24 +22,28 @@ $(document).ready(function() {
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
-    //console.log(mapBounds);
     if (map.getZoom() >= 17) {
       let semanticid = $('#semanticPulldown').val();
-      console.log(semanticid);
       drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001, semanticid);
     }
     $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
   });
 
-  $('#semanticPullDown').on('change', () => {
+  $('#semanticPulldown').on('change', () => {
+    let semanticid = $('#semanticPulldown').val();
     mapBounds = map.getBounds();
-    //console.log(mapBounds);
     if (map.getZoom() >= 17) {
-      let semanticid = $('#semanticPulldown').val();
-      console.log(semanticid);
       drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001, semanticid);
     }
     $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
+
+    if (semanticid == '-1') {
+      // display new semantic form.
+      $('#rightcolumn').append('<div id="newSemanticForms"></div>');
+      $('#newSemanticForms').append('Semantic id <input id="newSemanticId" type="text">');
+      $('#newSemanticForms').append('Semantic name <input id="newSemanticName" type="text">');
+      $('#newSemanticForms').append('Semantic driver <input id="newSemanticDriverId" type="text">');
+    }
   })
 });
 
@@ -59,6 +61,8 @@ function createSemanticPulldown() {
       let semantics = record.SEMANTICS;
       semanticPulldown.append('<option value="' + id + '">' + id + ': ' + semantics + '</option>');
     });
+
+    semanticPulldown.append('<option value="-1">Create new Semantics</option>');
   })
 }
 
@@ -78,8 +82,11 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
     vertices.clearLayers();
 
     data.features.forEach(function(feature) {
+      let linkid = feature.properties.linkid;
+      let semanticid = $('#semanticPulldown').val();
+      let selectedItem = semanticsArray.filter(semantic => semantic.SEMANTIC_LINK_ID == semanticid)[0];
       let popupContent = '<div class=\"popupText\">';
-      popupContent += feature.properties.linkid;
+      popupContent += linkid;
       popupContent += '</div>';
       let popup = L.popup()
                     .setContent(popupContent);
@@ -89,8 +96,37 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
         opacity: 0.5
       })
         .bindPopup(popup, {})
-        .on('click', function() {
-          console.log(line.attribution);
+        .on('click', () => {
+          if (line.attribution.issemantic == 1) {
+            console.log('remove ' + linkid + ' from ' + semanticid);
+            requestLinkDelete(semanticid, linkid);
+          } else if (semanticid == -1) {
+            // new Semantics
+            // validate form value
+            let newSemanticId = parseInt($('#newSemanticId').val());
+            let newSemanticName = $('#newSemanticName').val();
+            let newSemanticDriverId = parseInt($('#newSemanticDriverId').val());
+            if (!Number.isInteger(newSemanticId)) {
+              console.log(':'+newSemanticId+':');
+              alert('Semantic id Must be Interger!');
+              return;
+            }
+            if (!Number.isInteger(newSemanticDriverId)) {
+              console.log(':'+newSemanticDriverId+':');
+              alert('Semantic Driver id must be interger!');
+              return;
+            }
+            if (newSemanticName.length == 0) {
+              console.log(newSemanticName + ': ' + newSemanticName.length);
+              alert('Name must not be null!');
+              return;
+            }
+
+            // value was validated.
+            requestLinkCreate(newSemanticId, newSemanticName, newSemanticDriverId, linkid);
+          } else if (semanticid != 0) {
+            requestLinkCreate(semanticid, selectedItem.SEMANTICS, selectedItem.DRIVER_ID, linkid);
+          }
         })
         .on('popupopen', () => {
           line.setStyle({color: '#00FF00'});
@@ -99,7 +135,7 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
           line.setStyle({color: line.attribution.color});
         });
       line.attribution = {};
-      line.attribution.linkid = feature.properties.linkid;
+      line.attribution.linkid = linkid;
       line.attribution.issemantic = feature.properties.issemantics;
       line.attribution.count = feature.properties.count;
 
@@ -145,15 +181,16 @@ function requestLinkCreate(semanticid, semantic, driverid, linkid) {
   }
 
   let requestURL = '/methods/createsemantic';
-  requestURL += '?semanticid=' + semanticid;
-  requestURL += '&linkid=' + linkid;
-  requestURL += '&semantic=' + semantic;
-  requestURL += '&driverid' + driverid;
 
-  $.ajax({
-    url: requestURL,
-    type: 'POST',
-  }).done((response) => {
+  $.post(
+    requestURL,
+    {
+      semanticid: semanticid,
+      linkid: linkid,
+      semantic: semantic,
+      driverid: driverid
+    }
+  ).done((response) => {
     console.log(response);
   });
 }
