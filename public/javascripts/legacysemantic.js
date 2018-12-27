@@ -1,4 +1,5 @@
 var highlighted = [];
+var semanticsArray = [];
 
 $(document).ready(function() {
   let map = L.map('map').setView([35.3973359,139.4651749], 17);
@@ -47,6 +48,8 @@ $(document).ready(function() {
 function createSemanticPulldown() {
   let requestURL = '/json/legacy/semanticlist/';
   $.getJSON(requestURL).done(function(data) {
+    semanticsArray = data;
+    console.log(semanticsArray);
     let semanticPulldown = $('#semanticPulldown');
     semanticPulldown.empty();
     semanticPulldown.append('<option value="0" selected>---</option>');

@@ -5,7 +5,8 @@ function makeSemanticListQuery() {
 
   query = '';
   query += 'SELECT  DISTINCT SEMANTIC_LINK_ID, ';
-  query += '        SEMANTICS ';
+  query += '        SEMANTICS, ';
+  query += '        DRIVER_ID ';
   query += 'FROM    SEMANTIC_LINKS ';
   query += 'ORDER BY SEMANTIC_LINK_ID ';
 
