@@ -49,6 +49,12 @@ app.get('/legacylinestring', function(req, res) {
   });
 });
 
+app.get('/legacysemantic', (req, res) => {
+  res.render('legacysemantic', {
+    title: 'Semantic Editor'
+  });
+})
+
 app.get('/json/legacy/edge/', function(req, res) {
   linkFetcher.fetchEdgeLegacy(req.query.latstart,
                               req.query.lngstart,

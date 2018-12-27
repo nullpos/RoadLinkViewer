@@ -13,44 +13,68 @@ $(document).ready(function() {
     }
   ).addTo( map );
 
+  console.log('?');
+  createSemanticPulldown();
+
   let mapBounds = map.getBounds();
   //console.log(mapBounds);
-  drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
+  drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001, 0);
   $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
     //console.log(mapBounds);
     if (map.getZoom() >= 17) {
-      drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
+      let semanticid = $('#semanticPulldown').val();
+      console.log(semanticid);
+      drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001, semanticid);
     }
     $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
   });
+
+  $('#semanticPullDown').on('change', () => {
+    mapBounds = map.getBounds();
+    //console.log(mapBounds);
+    if (map.getZoom() >= 17) {
+      let semanticid = $('#semanticPulldown').val();
+      console.log(semanticid);
+      drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001, semanticid);
+    }
+    $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
+  })
 });
 
-function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
-  let requestLineString = '/json/legacy/linestring/?';
+function createSemanticPulldown() {
+  let requestURL = '/json/legacy/semanticlist/';
+  $.getJSON(requestURL).done(function(data) {
+    let semanticPulldown = $('#semanticPulldown');
+    semanticPulldown.empty();
+    semanticPulldown.append('<option value="0" selected>---</option>');
+
+    data.forEach((record) => {
+      let id = record.SEMANTIC_LINK_ID;
+      let semantics = record.SEMANTICS;
+      semanticPulldown.append('<option value="' + id + '">' + id + ': ' + semantics + '</option>');
+    });
+  })
+}
+
+function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semanticid) {
+  let requestLineString = '/json/legacy/semantics/?';
   requestLineString += 'latstart=' + latStart;
   requestLineString += '&lngstart=' + lngStart;
   requestLineString += '&latend=' + latEnd;
   requestLineString += '&lngend=' + lngEnd;
+  if (semanticid) {
+    requestLineString += '&semanticid=' + semanticid;
+  }
 
   $.getJSON(requestLineString).done(function(data) {
     //console.log(data);
-    //lines.clearLayers();
-    lines.eachLayer(function(line) {
-      if (highlighted.indexOf(line.attribution) == -1) {
-        lines.removeLayer(line);
-      }
-    })
+    lines.clearLayers();
     vertices.clearLayers();
 
     data.features.forEach(function(feature) {
-      if (highlighted.indexOf(feature.properties.linkid) >= 0) {
-        // This link is already displayed.
-        return;
-      }
-
       let popupContent = '<div class=\"popupText\">';
       popupContent += feature.properties.linkid;
       popupContent += '</div>';
@@ -59,35 +83,32 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
 
       let line = L.polyline(feature.geometry.coordinates, {
         weight: 10,
-        opacity: 0.3,
-        color: '#0000FF'
+        opacity: 0.5
       })
+        .bindPopup(popup, {})
         .on('click', function() {
-          //line.setStyle({color: '#FF0000'});
-          if (highlighted.indexOf(line.attribution) >= 0) {
-            // This line is already highlighted.
-            // Color turns to default.
-            line.setStyle({color: '#0000FF'});
-            // Remove linkid from highlighted.
-            highlighted = highlighted.filter(v => v != line.attribution);
-          } else {
-            // This line is not highlighted now.
-            // Color turns to special.
-            line.setStyle({color: '#FF0000'});
-            // Add this line into highlighted.
-            highlighted.push(line.attribution);
-          }
-          let text = '';
-          highlighted.forEach(function(linkid, index) {
-            text += linkid;
-            if (index != highlighted.length - 1) {
-              text += ',';
-            }
-            text += '<br>';
-          });
-          $('#layersInfo').html(text);
+          console.log(line.attribution);
+        })
+        .on('popupopen', () => {
+          line.setStyle({color: '#00FF00'});
+        })
+        .on('popupclose', () => {
+          line.setStyle({color: line.attribution.color});
         });
-      line.attribution = feature.properties.linkid;
+      line.attribution = {};
+      line.attribution.linkid = feature.properties.linkid;
+      line.attribution.issemantic = feature.properties.issemantics;
+      line.attribution.count = feature.properties.count;
+
+      // Default Color is blue.
+      line.attribution.color = '#0000FF';
+      
+      if (line.attribution.issemantic == 1) {
+        // if this link is contained in specified semantic link.
+        line.attribution.color = '#FF0000';
+      }
+
+      line.setStyle({color: line.attribution.color});
 
       lines.addLayer(line);
 
@@ -112,5 +133,42 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
         vertices.addLayer(vertex);
       });
     });
+  })
+}
+
+function requestLinkCreate(semanticid, semantic, driverid, linkid) {
+  if (!(semanticid && linkid && semantic && driverid)) {
+    return false;
+  }
+
+  let requestURL = '/methods/createsemantic';
+  requestURL += '?semanticid=' + semanticid;
+  requestURL += '&linkid=' + linkid;
+  requestURL += '&semantic=' + semantic;
+  requestURL += '&driverid' + driverid;
+
+  $.ajax({
+    url: requestURL,
+    type: 'POST',
+  }).done((response) => {
+    console.log(response);
+  });
+}
+
+function requestLinkDelete(semanticid, linkid) {
+  // From semanticid and link id, delete link from semantic link.
+  if (!(semanticid && linkid)) {
+    return false;
+  }
+
+  let requestURL = '/methods/deletesemantic';
+  requestURL += '?semanticid=' + semanticid;
+  requestURL += '&linkid=' + linkid;
+
+  $.ajax({
+    url: requestURL,
+    type: 'DELETE'
+  }).done((response) => {
+    console.log(response);
   })
 }

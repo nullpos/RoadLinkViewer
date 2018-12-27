@@ -1,0 +1,34 @@
+html {
+  height: 100%;
+}
+
+body {
+  padding: 5px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  height: 90%;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#mapInfoContainer {
+  height: 90%;
+  display: flex;
+}
+
+#map {
+  width: 70%;
+  height: 100%;
+  float: left;
+}
+
+#rightcolumn {
+  width: 30%;
+  margin-left: 5px;
+  float: right;
+}
+
+.popupText {
+  font-size: 8px;
+}
