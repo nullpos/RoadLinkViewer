@@ -110,14 +110,16 @@ app.get('/json/legacy/semantics/', function(req, res) {
     semanticid = -1;
   }
 
-  linkFetcher.fetchLineStringSemanticAndRectangle(req.query.latstart,
-                                                  req.query.lngstart,
-                                                  req.query.latend,
-                                                  req.query.lngend,
-                                                  semanticid,
-                                                  function(ret) {
-                                                    res.json(ret);
-                                                  });
+  if (req.query.latstart && req.query.latend && req.query.lngstart && req.query.lngend) {
+    linkFetcher.fetchLineStringSemanticAndRectangle(req.query.latstart,
+                                                    req.query.lngstart,
+                                                    req.query.latend,
+                                                    req.query.lngend,
+                                                    semanticid,
+                                                    function(ret) {
+                                                      res.json(ret);
+                                                    });
+  }
 });
 
 app.post('/methods/createsemantic', (req, res) => {

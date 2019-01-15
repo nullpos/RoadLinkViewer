@@ -1,0 +1,18 @@
+extends layout
+
+append stylesheet
+  link(rel='stylesheet', href='/stylesheets/aggregatebysemantic.css')
+
+block content
+  h1 = title
+
+  form
+    select#sematicPulldown(name='semantic')
+
+  #mapGraphContainer
+    #map
+    #graph
+
+  #sqlbox
+
+  script(src='/javascript/aggregatebysemantic.js')
