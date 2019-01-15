@@ -100,6 +100,7 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
           if (line.attribution.issemantic == 1) {
             console.log('remove ' + linkid + ' from ' + semanticid);
             requestLinkDelete(semanticid, linkid);
+            line.attribution.color = '#0000FF';
           } else if (semanticid == -1) {
             // new Semantics
             // validate form value
@@ -124,8 +125,10 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
 
             // value was validated.
             requestLinkCreate(newSemanticId, newSemanticName, newSemanticDriverId, linkid);
+            line.attribution.color = '#FF0000';
           } else if (semanticid != 0) {
             requestLinkCreate(semanticid, selectedItem.SEMANTICS, selectedItem.DRIVER_ID, linkid);
+            line.attribution.color = '#FF0000';
           }
         })
         .on('popupopen', () => {

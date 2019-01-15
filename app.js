@@ -121,11 +121,27 @@ app.get('/json/legacy/semantics/', function(req, res) {
 });
 
 app.post('/methods/createsemantic', (req, res) => {
-  res.status(200).send(req);
+  let semanticId = req.body.semanticid;
+  let driverId = req.body.driverid;
+  let linkId = req.body.linkid;
+  let semantic = req.body.semantic;
+
+  if (semanticId && driverId && linkId && semantic) {
+    semantics.createSemantics(semanticId, driverId, linkId, semantic, (status, result) => {
+      res.status(status).send(result);
+    });
+  } else {
+    console.log(semanticId);
+    console.log(driverId);
+    console.log(linkId);
+    console.log(semantic);
+    console.log(req.body);
+    res.status(400).send(req.body);
+  }
 })
 
 app.delete('/methods/deletesemantic', (req, res) => {
-  res.status(200).send(req);
+  res.status(200).send(req.query);
 })
 
 // catch 404 and forward to error handler

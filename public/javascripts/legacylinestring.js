@@ -14,17 +14,21 @@ $(document).ready(function() {
   ).addTo( map );
 
   let mapBounds = map.getBounds();
+  let mapCenter = map.getCenter();
   //console.log(mapBounds);
   drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
   $('#zoomValue').html('current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
+  $('#centerPoint').html('Center: ' + mapCenter.lat + ', ' + mapCenter.lng);
 
   map.on('moveend', function() {
     mapBounds = map.getBounds();
+    mapCenter = map.getCenter();
     //console.log(mapBounds);
     if (map.getZoom() >= 17) {
       drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001);
     }
     $('#zoomValue').html('Current map zoom level is ' + map.getZoom() + '. If map zoom level below 17, markers will not be ploted.');
+    $('#centerPoint').html('Center: ' + mapCenter.lat + ', ' + mapCenter.lng);
   });
 });
 
