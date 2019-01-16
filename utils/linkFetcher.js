@@ -118,6 +118,26 @@ function makeSemanticViewQuery(latStart, lngStart, latEnd, lngEnd, semanticId) {
   return query;
 }
 
+/**
+ * This function nake query to fetch specified semantic's nodes.
+ * @param {*} semanticid 
+ */
+function makeSemanticLinksFetchQuery (semanticid) {
+  let query = '';
+  query += 'SELECT  LINK_ID, ';
+  query += '        NUM, ';
+  query += '        LATITUDE, ';
+  query += '        LONGITUDE ';
+  query += 'FROM    LINKS AS l ';
+  query += 'WHERE   LINK_ID IN (';
+  query += '          SELECT  DISTINCT LINK_ID ';
+  query += '          FROM    SEMANTIC_LINKS  ';
+  query += '          WHERE   SEMANTIC_LINK_ID = ' + semanticid + ') ';
+  query += 'ORDER BY LINK_ID, NUM';
+
+  return query;
+}
+
 function makeLineStringGeoJson(orderedLinks) {
   let response = {};
   response.type = 'FeatureCollection';
