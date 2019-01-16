@@ -4,10 +4,10 @@ append stylesheet
   link(rel='stylesheet', href='/stylesheets/aggregatebysemantic.css')
 
 block content
-  h1 = title
+  h1=title
 
   form
-    select#sematicPulldown(name='semantic')
+    select#semanticPulldown(name='semantic')
 
   #mapGraphContainer
     #map
@@ -15,4 +15,4 @@ block content
 
   #sqlbox
 
-  script(src='/javascript/aggregatebysemantic.js')
+  script(src='/javascripts/aggregatebysemantic.js')

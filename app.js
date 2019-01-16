@@ -53,7 +53,13 @@ app.get('/legacysemantic', (req, res) => {
   res.render('legacysemantic', {
     title: 'Semantic Editor'
   });
-})
+});
+
+app.get('/aggregatebysemantic', (req, res) => {
+  res.render('aggregatebysemantic', {
+    title: 'Aggregate By Semantic'
+  });
+});
 
 app.get('/json/legacy/edge/', function(req, res) {
   linkFetcher.fetchEdgeLegacy(req.query.latstart,
