@@ -6,13 +6,23 @@ append stylesheet
 block content
   h1=title
 
-  form
-    select#semanticPulldown(name='semantic')
+  #pulldowns
+    form
+      select#semanticPulldown(name='semantic')
+    form
+      select#directionPulldown(name='direction')
+        option(value="outward" selected) outward
+        option(value="homeward") homeward
+    button#drawButton Draw Graph
 
   #mapGraphContainer
     #map
     #graph
 
-  #sqlbox
+  #configContainer
+    textarea#sqlbox(placeholder="Input SQL")
+    #config
+
+  button#submitButton Submit SQL Statement
 
   script(src='/javascripts/aggregatebysemantic.js')

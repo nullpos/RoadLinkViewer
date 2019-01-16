@@ -8,9 +8,15 @@ body {
   height: 90%;
 }
 
+#pulldowns {
+  display: flex;
+}
+
 #mapGraphContainer {
   height: 50%;
   display: flex;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 #map {
@@ -22,4 +28,30 @@ body {
 #graph {
   width: 50%;
   float: right;
+}
+
+#configContainer {
+  height: 40%;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  display: flex;
+}
+
+#sqlbox {
+  height: 100%;
+  width: 50%;
+  padding-right: 5px;
+  float: left;
+}
+
+#config {
+  height: 100%;
+  width: 50%;
+  padding-left: 5px;
+  float: right;
+}
+
+#submitButton {
+  padding-top: 5px;
 }

@@ -22,6 +22,29 @@ $(document).ready(function() {
       drawSemantic(lines, semanticid);
     }
   })
+
+  $('#drawButton').on('click', () => {
+    let semanticid = $('#semanticPulldown').val();
+    let direction = $('#directionPulldown').val();
+
+    if (semanticid != -1) {
+      drawSemantic(lines, semanticid);
+    }
+  })
+
+  $('#submitButton').on('click', () => {
+    let query = $('#sqlbox').val();
+    query = query.replace(/\n/g, ' ');
+    console.log(query);
+
+    let requestURL = '/query?query=' + query;
+    alert('Sorry, custom sql feature have not been implemented.');
+
+    return;
+    $.getJSON(requestURL).done((data) => {
+      console.log(data);
+    })
+  })
 });
 
 function createSemanticPulldown() {
