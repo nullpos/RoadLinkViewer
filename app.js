@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 let linkFetcher = require('./utils/linkFetcher.js');
 let semantics = require('./utils/semantic.js');
+let aggregater = require('./utils/aggregater');
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -108,6 +109,20 @@ app.get('/json/legacy/semanticlist', (req, res) => {
   });
 });
 
+app.get('/json/legacy/chorale', (req, res) => {
+  if (!req.query.semanticid) {
+    res.status(400).send({error: 'semantic id is needed.'});
+  }
+
+  if (!req.query.direction) {
+    res.status(400).send({error: 'direction is needed'});
+  }
+
+  aggregater.calcCHORALE(req.query.semanticid, req.query.direction, req.query.option, (result) => {
+    res.json(result);
+  })
+})
+
 // sample: /json/legacy/semantics/?latstart=35.3932102722828&lngstart=139.4594814052582&latend=35.401454674824315&lngend=139.47085840797428&semanticid=366
 app.get('/json/legacy/semantics/', function(req, res) {
   let semanticid = req.query.semanticid;
@@ -155,6 +170,12 @@ app.post('/methods/createsemantic', (req, res) => {
 
 app.delete('/methods/deletesemantic', (req, res) => {
   res.status(200).send(req.query);
+})
+
+app.get('/query', (req, res) => {
+  let query = req.query.query;
+  console.log(query);
+  res.send({query: query});
 })
 
 // catch 404 and forward to error handler
