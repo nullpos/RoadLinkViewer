@@ -119,6 +119,11 @@ app.get('/json/legacy/semantics/', function(req, res) {
                                                     function(ret) {
                                                       res.json(ret);
                                                     });
+  } else if (semanticid != -1) {
+    // fetch only semantic links.
+    linkFetcher.fetchLineStringSemantic(semanticid, function(ret) {
+      res.json(ret);
+    })
   }
 });
 

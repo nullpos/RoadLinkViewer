@@ -247,6 +247,56 @@ exports.fetchLineStringSemanticAndRectangle = (latStart, lngStart, latEnd, lngEn
   })
 }
 
+exports.fetchLineStringSemantic = (semanticid, callback) => {
+  let querystmt = makeSemanticLinksFetchQuery(semanticid);
+
+  getQueryResult(querystmt, function(orderedLinks) {
+    let response = {};
+    response.type = 'FeatureCollection';
+    response.features = [];
+
+    let currentLinkId = null;
+    let feature = {};
+    let count = 0;
+
+    orderedLinks.forEach(function(record) {
+      if (currentLinkId !== record.LINK_ID) {
+        if (currentLinkId) {
+          // push current linestring.
+          feature.properties.count = count;
+          response.features.push(feature)
+        }
+
+        // change link.
+
+        currentLinkId = record.LINK_ID;
+
+        feature = {};
+        feature.type = 'Feature';
+        feature.geometry = {};
+        feature.geometry.type = 'LineString';
+        feature.geometry.coordinates = [];
+        feature.properties = {};
+        feature.properties.linkid = record.LINK_ID;
+        count = 0;
+      }
+
+      feature.geometry.coordinates.push([record.LATITUDE, record.LONGITUDE]);
+      count++;
+    });
+
+    if (feature) {
+      // push last feature.
+      feature.properties = {};
+      feature.properties.linkid = currentLinkId;
+      feature.properties.count = count;
+      response.features.push(feature);
+    }
+
+    callback(response);
+  })
+}
+
 
 exports.fetchLinksGSI20 = function(latStart, lngStart, latEnd, lngEnd, callback) {
   let querystmt = makeLinkFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd);
