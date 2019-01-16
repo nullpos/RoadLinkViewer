@@ -32,7 +32,7 @@ function makeCHORALEQuery(semanticid, direction, option) {
 
 exports.calcCHORALE = (semanticid, direction, option, callback) => {
   let queryStmt = makeCHORALEQuery(semanticid, direction, option);
-  console.log(queryStmt);
+
   getQueryResult(queryStmt, (result) => {
     callback(result);
   });
