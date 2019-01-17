@@ -29,6 +29,11 @@ $(document).ready(function() {
 
     if (semanticid != -1) {
       drawSemantic(lines, semanticid);
+
+      let requestURL = '/json/legacy/chorale?semanticid=' + semanticid + '&direction=' + direction;
+      $.getJSON(requestURL).done((data) => {
+        
+      })
     }
   })
 
@@ -91,5 +96,19 @@ function drawSemantic(lines, semanticid) {
     })
   })
 
+}
+
+// d3.js functions
+
+function drawHistogram(data, xAxisColumn, yAxisColumn, xAxisRange, yAxixRange, bins) {
+  // set drawing area.
+  
+  let svg = d3.select('#graph').append("svg")
+              .attr("width", $("#graph").width())
+              .attr("height", $("#graph").height());
+  let margin = {top: 10, right: 30, bottom: 10, left: 30},
+      width = svg.attr("width"),
+      height = svg.attr("height");
+  
 }
 
