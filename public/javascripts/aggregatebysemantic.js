@@ -102,6 +102,7 @@ function drawSemantic(lines, semanticid) {
 
 function drawHistogram(data, xAxisColumn, yAxisColumn, xAxisRange, yAxixRange, bins) {
   // set drawing area.
+    
   
   let svg = d3.select('#graph').append("svg")
               .attr("width", $("#graph").width())
