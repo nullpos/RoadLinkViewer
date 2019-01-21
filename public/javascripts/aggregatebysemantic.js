@@ -32,7 +32,8 @@ $(document).ready(function() {
 
       let requestURL = '/json/legacy/chorale?semanticid=' + semanticid + '&direction=' + direction;
       $.getJSON(requestURL).done((data) => {
-        
+        console.log(data[0]);
+        drawHistogram(data, 'count', [0, 500], 20);
       })
     }
   })
@@ -100,9 +101,10 @@ function drawSemantic(lines, semanticid) {
 
 // d3.js functions
 
-function drawHistogram(data, xAxisColumn, yAxisColumn, xAxisRange, yAxixRange, bins) {
+function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
   // set drawing area.
-    
+  d3.selectAll('svg')
+      .remove();
   
   let svg = d3.select('#graph').append("svg")
               .attr("width", $("#graph").width())
@@ -110,6 +112,61 @@ function drawHistogram(data, xAxisColumn, yAxisColumn, xAxisRange, yAxixRange, b
   let margin = {top: 10, right: 30, bottom: 10, left: 30},
       width = svg.attr("width"),
       height = svg.attr("height");
+
+  let xScale = d3.scaleLinear()
+                .domain(xAxisRange)
+                .rangeRound([0, width - margin.right - margin.left]);
   
+  let yScale = d3.scaleLinear()
+                .range([height - margin.top - margin.bottom, 0])
+  
+  let histogram = d3.histogram()
+                    .value((d) => { return d[xAxisColumn]; })
+                    .domain(xScale.domain())
+                    .thresholds(xScale.ticks(binsNum));
+
+  let bins = histogram(data);
+  yScale.domain([0, d3.max(bins, (d) => { 
+    if (d.length) {
+      return d.length;
+    } else {
+      return 0;
+    }
+  })]);
+
+  console.log(bins);
+
+  svg.selectAll('rect')
+        .data(bins)
+      .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', 1)
+        .attr('transform', (d) => {
+          if (d.length) {
+            return 'translate(' + (xScale(d.x0) + margin.left) + ',' + yScale(d.length) + ')';
+          } else {
+            console.log('d.length is undefined.');
+            return 'translate(' + (xScale(d.x0) + margin.left) + ', 0)';
+          }
+          
+        })
+        .attr('width', (d) => { return xScale(d.x1) - xScale(d.x0) - 1; })
+        .attr('height', (d) => {
+          if (d.length) {
+            return height - margin.top - margin.bottom - yScale(d.length);  
+          } else {
+            return 0;
+          }
+        });
+
+  // add the x Axis
+  svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ', ' + (height - margin.top - margin.bottom) + ')')
+        .call(d3.axisBottom(xScale));
+
+  // add the y Axis
+  svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ', 0)')
+        .call(d3.axisLeft(yScale));
 }
 
