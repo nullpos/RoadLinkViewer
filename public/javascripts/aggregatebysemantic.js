@@ -16,7 +16,6 @@ $(document).ready(function() {
   // event handlers.
   $('#semanticPulldown').on('change', () => {
     let semanticid = $('#semanticPulldown').val();
-    console.log(semanticid);
 
     if (semanticid != -1) {
       drawSemantic(lines, semanticid);
@@ -33,7 +32,8 @@ $(document).ready(function() {
       let requestURL = '/json/legacy/chorale?semanticid=' + semanticid + '&direction=' + direction;
       $.getJSON(requestURL).done((data) => {
         console.log(data[0]);
-        drawHistogram(data, 'count', [0, 500], 20);
+        // drawHistogram(data, 'count', [0, 500], 20);
+        drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 20, 20);
       })
     }
   })
@@ -139,8 +139,6 @@ function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
     }
   })]);
 
-  console.log(bins);
-
   svg.selectAll('rect')
         .data(bins)
       .enter().append('rect')
@@ -166,7 +164,7 @@ function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
 
   // add the x Axis
   svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ', ' + (height - margin.top - margin.bottom) + ')')
+        .attr('transform', 'translate(' + margin.left + ', ' + (height - margin.left) + ')')
         .call(d3.axisBottom(xScale));
 
   // add the y Axis
@@ -175,3 +173,83 @@ function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
         .call(d3.axisLeft(yScale));
 }
 
+// draw Heatmap function
+function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBinsNum, yBinsNum) {
+  // make Heatmap Data.
+  let heatMapData = [];
+  for (let i = 0; i < yBinsNum; i++) {
+    heatMapData.push(new Array());
+    for (let j = 0; j < xBinsNum; j++) {
+      heatMapData[i].push(0);
+    }
+  }
+
+  data.forEach((d) => {
+    let xVal = d[xAxisColumn];
+    let yVal = d[yAxisColumn];
+    if (xAxisRange[0] <= xVal && xVal < xAxisRange[1] && yAxisRange[0] <= yVal && yVal < yAxisRange[1]) {
+      xindex = Math.floor((xVal - xAxisRange[0]) / ((xAxisRange[1] - xAxisRange[0]) / xBinsNum));
+      yindex = Math.floor((yVal - yAxisRange[0]) / ((yAxisRange[1] - yAxisRange[0]) / yBinsNum));
+      heatMapData[yindex][xindex]++;
+    }
+  });
+
+  // set drawing area.
+  d3.selectAll('svg')
+      .remove();
+
+  let width = $('#graph').width(),
+      height = $('#graph').height(),
+      margin = {
+        top: 10,
+        bottom: 30,
+        left: 30,
+        right: 10
+      }
+  let svg = d3.select('#graph').append('svg')
+              .attr('width', width)
+              .attr('height', height)
+  
+  let xScale = d3.scaleBand()
+                  .rangeRound([margin.left, width - margin.right - margin.left])
+                  .domain(d3.range(xBinsNum))
+                  .padding(0.05);
+  let yScale = d3.scaleBand()
+                  .rangeRound([height - margin.bottom, margin.top])
+                  .domain(d3.range(yBinsNum))
+                  .padding(0.05);
+
+  console.log(yScale);
+
+  let color = d3.scaleSequential((t) => { return d3.interpolate('gray', 'steelblue')(t); })
+                  .domain([0, d3.max(heatMapData, (row) => { return d3.max(row); })])
+
+  svg.selectAll('.row')
+      .data(heatMapData)
+      .enter()
+      .append('g')
+      .attr('class', 'row')
+      .attr('transform', (d, i) => { 
+        return 'translate(0, ' + yScale(i) + ')';
+      })
+      .selectAll('.cell')
+      .data((d) => { return d })
+      .enter()
+      .append('rect')
+      .attr('class', 'cell')
+      .attr('x', (d, i) => {
+        return xScale(i);
+      })
+      .attr('width', xScale.bandwidth())
+      .attr('height', yScale.bandwidth())
+      .attr('opacity', 0.9)
+      .attr('fill', (d) => { return color(d); });
+
+  svg.append('g')
+        .attr('transform', 'translate(0, ' + (height - margin.bottom) + ')')
+        .call(d3.axisBottom(xScale));
+  svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
+        .call(d3.axisLeft(yScale));
+
+}
