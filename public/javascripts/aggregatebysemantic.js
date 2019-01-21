@@ -101,6 +101,11 @@ function drawSemantic(lines, semanticid) {
 
 // d3.js functions
 
+// draw Histogram function
+// data: CHORALE Query Result.
+// xAxisColumn: Single column name of CHORALE Query
+// xAxisRange: 2 element of Array, like [xMin, xMax]. ex.) [0, 500].
+// binsNum: Number of bins.
 function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
   // set drawing area.
   d3.selectAll('svg')
