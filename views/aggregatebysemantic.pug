@@ -13,7 +13,7 @@ block content
       select#directionPulldown(name='direction')
         option(value="outward" selected) outward
         option(value="homeward") homeward
-    button#drawButton Draw Graph
+    button#fetchButton Fetch Data On Selected Semantic Link
 
   #mapGraphContainer
     #map
@@ -22,6 +22,15 @@ block content
   #configContainer
     textarea#sqlbox(placeholder="Input SQL")
     #config
+      .configChildren#graphSelector Choose graph type
+        div
+          input(type='radio' name='graph' value='histogram' checked)
+          label(for='graph') Histogram
+        div
+          input(type='radio' name='graph' value='heatmap')
+          label(for='graph') Heatmap
+      .configChildren#graphConfig
+      button.configChildren#redrawButton Redraw
 
   button#submitButton Submit SQL Statement
 

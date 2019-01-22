@@ -52,6 +52,11 @@ body {
   float: right;
 }
 
+.configChildren {
+  margin: 5px;
+  background-color: antiquewhite;
+}
+
 #submitButton {
   padding-top: 5px;
 }

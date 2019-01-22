@@ -2,6 +2,7 @@
 $(document).ready(function() {
   let map = L.map('map').setView([35.3973359, 139.4651749], 17);
   let lines = L.layerGroup().addTo(map);
+  let choraleData = [];
 
   L.tileLayer(
     'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -12,7 +13,7 @@ $(document).ready(function() {
   ).addTo( map );
 
   createSemanticPulldown();
-  createConfig();
+  createConfig(choraleData);
 
   // event handlers.
   $('#semanticPulldown').on('change', () => {
@@ -23,7 +24,7 @@ $(document).ready(function() {
     }
   })
 
-  $('#drawButton').on('click', () => {
+  $('#fetchButton').on('click', () => {
     let semanticid = $('#semanticPulldown').val();
     let direction = $('#directionPulldown').val();
 
@@ -32,12 +33,22 @@ $(document).ready(function() {
 
       let requestURL = '/json/legacy/chorale?semanticid=' + semanticid + '&direction=' + direction;
       $.getJSON(requestURL).done((data) => {
+        choraleData = data;
+        createConfig(choraleData);
         console.log(data[0]);
         // drawHistogram(data, 'count', [0, 500], 20);
-        drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 10, 10);
+        // drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 10, 10);
       })
     }
   })
+
+  $('input[name="graph"]').on('change', () => {
+    createConfig(choraleData);
+  })
+
+  $('#redrawButton').on('click', () => {  
+    alert('Sorry, This button\'s event handler is not implemented.');
+  });
 
   $('#submitButton').on('click', () => {
     let query = $('#sqlbox').val();
@@ -100,15 +111,47 @@ function drawSemantic(lines, semanticid) {
 
 }
 
-// config UI.
-function createConfig() {
-  $('#config').append('<div id="graphSelector"></div>');
-  $('#graphSelector').append('<div><input type="radio" name="graph" value="histogram" checked>');
-  $('#graphSelector').append('<label for="histogram">Histogram</label></div>');
-  $('#graphSelector').append('<div><input type="radio" name="graph" value="heatmap">');
-  $('#graphSelector').append('<label for="heatmap">Heatmap</label></div>');
-  $('#config').append('<div id="graphConfig"></div>');
-  $('#config').append('<button id="redrawButton">Redraw</button>');
+// functions which craetes config user interface. 
+
+function createConfig(choraleData) {
+  let graphname = $('input[name="graph"]:checked').val();
+  console.log(graphname);
+
+  if (graphname === 'histogram') {
+    createConfigForHistogram(choraleData);
+  } else if (graphname === 'heatmap') {
+
+  }
+}
+
+// create config for Histogram
+function createConfigForHistogram(data) {
+  let graphConfig = $('#graphConfig');
+  graphConfig.empty();
+  graphConfig.append('<div id="xAxisColumnSelector">xAxisColumn</div>');
+  let xAxisColumnSelector = $('#xAxisColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = false;
+      if (index == 0) {
+        isSetCheck = true;
+      }
+      xAxisColumnSelector.append(createRadioBoxStmt('xAxisColumn', columnName, isSetCheck));
+    });
+  }
+}
+
+// radio box statement generator.
+function createRadioBoxStmt (name, columnName, isChecked) {
+  let stmt = '<div>';
+  stmt += '<input type="radio" name="' + name + '" value="' + columnName + '"';
+  if (isChecked) {
+    stmt += ' checked'
+  }
+  stmt += '>'
+  stmt += '<label for="' + name + '">' + columnName + '</label></div>'
+
+  return stmt;
 }
 
 // d3.js functions
