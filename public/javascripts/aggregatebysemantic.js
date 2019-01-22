@@ -12,6 +12,7 @@ $(document).ready(function() {
   ).addTo( map );
 
   createSemanticPulldown();
+  createConfig();
 
   // event handlers.
   $('#semanticPulldown').on('change', () => {
@@ -97,6 +98,17 @@ function drawSemantic(lines, semanticid) {
     })
   })
 
+}
+
+// config UI.
+function createConfig() {
+  $('#config').append('<div id="graphSelector"></div>');
+  $('#graphSelector').append('<div><input type="radio" name="graph" value="histogram" checked>');
+  $('#graphSelector').append('<label for="histogram">Histogram</label></div>');
+  $('#graphSelector').append('<div><input type="radio" name="graph" value="heatmap">');
+  $('#graphSelector').append('<label for="heatmap">Heatmap</label></div>');
+  $('#config').append('<div id="graphConfig"></div>');
+  $('#config').append('<button id="redrawButton">Redraw</button>');
 }
 
 // d3.js functions
