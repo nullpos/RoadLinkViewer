@@ -46,8 +46,21 @@ $(document).ready(function() {
     createConfig(choraleData);
   })
 
-  $('#redrawButton').on('click', () => {  
-    alert('Sorry, This button\'s event handler is not implemented.');
+  $('#drawButton').on('click', () => {
+    let graphname = $('input[name="graph"]:checked').val();
+    console.log(graphname);
+    if (graphname === 'histogram') {
+      console.log(graphname);
+      let xAxisName = $('input[name="xAxisColumn"]:checked').val();
+      let xMin = parseFloat($('#xMin').val());
+      let xMax = parseFloat($('#xMax').val());
+      let xBinsNum = parseInt($('#xBinsNum').val());
+
+      if (Number.isNaN(xMin) || Number.isNaN(xMax) || Number.isNaN(xBinsNum)) {
+        alert('Input Number!');
+      }
+      drawHistogram(choraleData, xAxisName, [xMin, xMax], xBinsNum);
+    }
   });
 
   $('#submitButton').on('click', () => {
@@ -127,8 +140,11 @@ function createConfig(choraleData) {
 // create config for Histogram
 function createConfigForHistogram(data) {
   let graphConfig = $('#graphConfig');
+  // clear element.
   graphConfig.empty();
-  graphConfig.append('<div id="xAxisColumnSelector">xAxisColumn</div>');
+
+  // create radio box for select x axis column.
+  graphConfig.append('<div id="xAxisColumnSelector" class="graphConfigChildren">x Axis Column</div>');
   let xAxisColumnSelector = $('#xAxisColumnSelector');
   if (data.length > 0) {
     Object.keys(data[0]).forEach((columnName, index) => {
@@ -139,6 +155,17 @@ function createConfigForHistogram(data) {
       xAxisColumnSelector.append(createRadioBoxStmt('xAxisColumn', columnName, isSetCheck));
     });
   }
+
+  // create x scale input area.
+  graphConfig.append('<div id="xAxisRangeInput" class="graphConfigChildren">x Axis Range Input</div>');
+  let xAxisRangeInput = $('#xAxisRangeInput');
+  xAxisRangeInput.append('<div>x Min<div><input type="text" id="xMin"></div></div>');
+  xAxisRangeInput.append('<div>x Max<div><input type="text" id="xMax"></div></div>');
+
+  // create input area for decide number of x axis bins.
+  graphConfig.append('<div id="xAxisBinsNumInput" class="graphConfigChildren">xAxisBinsNum</div>');
+  let xAxisBinsNumInput = $('#xAxisBinsNumInput');
+  xAxisBinsNumInput.append('<div><input type="text" id="xBinsNum"></div>');
 }
 
 // radio box statement generator.
@@ -219,12 +246,12 @@ function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
 
   // add the x Axis
   svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ', ' + (height - margin.left) + ')')
+        .attr('transform', 'translate(' + margin.left + ', ' + (height - margin.bottom - margin.top) + ')')
         .call(d3.axisBottom(xScale));
 
   // add the y Axis
   svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ', 0)')
+        .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
         .call(d3.axisLeft(yScale));
 }
 
