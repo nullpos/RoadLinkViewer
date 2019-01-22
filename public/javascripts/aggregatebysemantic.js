@@ -33,7 +33,7 @@ $(document).ready(function() {
       $.getJSON(requestURL).done((data) => {
         console.log(data[0]);
         // drawHistogram(data, 'count', [0, 500], 20);
-        drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 20, 20);
+        drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 10, 10);
       })
     }
   })
@@ -202,8 +202,8 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
       height = $('#graph').height(),
       margin = {
         top: 10,
-        bottom: 30,
-        left: 30,
+        bottom: 50,
+        left: 50,
         right: 10
       }
   let svg = d3.select('#graph').append('svg')
@@ -245,11 +245,21 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
       .attr('opacity', 0.9)
       .attr('fill', (d) => { return color(d); });
 
+  let xAxis = d3.axisBottom(xScale)
+                .tickFormat((i) => {
+                  let calc = (index) => { return (index * (xAxisRange[1] - xAxisRange[0]) / xBinsNum + xAxisRange[0]).toFixed(3); }
+                  return calc(i);
+                });
+  let yAxis = d3.axisLeft(yScale)
+                .tickFormat((i) => {
+                  let calc = (index) => { return (index * (yAxisRange[1] - yAxisRange[0]) / yBinsNum + yAxisRange[0]).toFixed(3); }
+                  return calc(i);
+                });
   svg.append('g')
         .attr('transform', 'translate(0, ' + (height - margin.bottom) + ')')
-        .call(d3.axisBottom(xScale));
+        .call(xAxis);
   svg.append('g')
         .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
-        .call(d3.axisLeft(yScale));
+        .call(yAxis);
 
 }
