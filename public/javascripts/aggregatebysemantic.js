@@ -29,8 +29,6 @@ $(document).ready(function() {
     let direction = $('#directionPulldown').val();
 
     if (semanticid != -1) {
-      drawSemantic(lines, semanticid);
-
       let requestURL = '/json/legacy/chorale?semanticid=' + semanticid + '&direction=' + direction;
       $.getJSON(requestURL).done((data) => {
         choraleData = data;
@@ -58,6 +56,7 @@ $(document).ready(function() {
 
       if (Number.isNaN(xMin) || Number.isNaN(xMax) || Number.isNaN(xBinsNum)) {
         alert('Input Number!');
+        return;
       }
       drawHistogram(choraleData, xAxisName, [xMin, xMax], xBinsNum);
     }
@@ -190,7 +189,7 @@ function createRadioBoxStmt (name, columnName, isChecked) {
 // binsNum: Number of bins.
 function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
   // set drawing area.
-  d3.selectAll('svg')
+  d3.selectAll('#graph svg')
       .remove();
   
   let svg = d3.select('#graph').append("svg")
