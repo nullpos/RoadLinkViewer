@@ -189,6 +189,9 @@ function createRadioBoxStmt (name, columnName, isChecked) {
 // binsNum: Number of bins.
 function drawHistogram(data, xAxisColumn, xAxisRange, binsNum) {
   // set drawing area.
+
+  // To avoid remove map's rendering svg area, 
+  // specify '#graph svg'. 
   d3.selectAll('#graph svg')
       .remove();
   
