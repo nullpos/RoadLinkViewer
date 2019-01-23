@@ -132,7 +132,7 @@ function createConfig(choraleData) {
   if (graphname === 'histogram') {
     createConfigForHistogram(choraleData);
   } else if (graphname === 'heatmap') {
-
+    createConfigForHeatmap(choraleData);
   }
 }
 
@@ -158,13 +158,48 @@ function createConfigForHistogram(data) {
   // create x scale input area.
   graphConfig.append('<div id="xAxisRangeInput" class="graphConfigChildren">x Axis Range Input</div>');
   let xAxisRangeInput = $('#xAxisRangeInput');
-  xAxisRangeInput.append('<div>x Min<div><input type="text" id="xMin"></div></div>');
-  xAxisRangeInput.append('<div>x Max<div><input type="text" id="xMax"></div></div>');
+  xAxisRangeInput.append('<div>x Min<div><input type="text" id="xMin" class="numberbox"></div></div>');
+  xAxisRangeInput.append('<div>x Max<div><input type="text" id="xMax" class="numberbox"></div></div>');
 
   // create input area for decide number of x axis bins.
   graphConfig.append('<div id="xAxisBinsNumInput" class="graphConfigChildren">xAxisBinsNum</div>');
   let xAxisBinsNumInput = $('#xAxisBinsNumInput');
-  xAxisBinsNumInput.append('<div><input type="text" id="xBinsNum"></div>');
+  xAxisBinsNumInput.append('<div><input type="text" id="xBinsNum" class="numberbox"></div>');
+}
+
+function createConfigForHeatmap(data) {
+  let graphConfig = $('#graphConfig');
+  // clear element.
+  graphConfig.empty();
+
+  // create radio box for select x axis column.
+  graphConfig.append('<div id="xAxisColumnSelector" class="graphConfigChildren">xAixsColumn</div>');
+  let xAxisColumnSelector = $('#xAxisColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = false;
+      if (index == 0) isSetCheck = true;
+      xAxisColumnSelector.append(createRadioBoxStmt('xAxisColumn', columnName, isSetCheck));
+    });
+  }
+
+  // create x scale input area.
+  graphConfig.append('<div id="xAxisRangeInput" class="graphConfigChildren">xAxisRangeInput</div>');
+  let xAxisRangeInput = $('#xAxisRangeInput');
+  xAxisRangeInput.append('<div>xMin<div><input type="text" id="xMin" class="numberbox"></div></div>');
+  xAxisRangeInput.append('<div>xMax<div><input type="text" id="xMax" class="numberbox"></div></div>');
+
+  // add bins selector to below xAxisRangeInput.
+  xAxisRangeInput.append('<div>xBisNum<div><input type="text" id="xBinsNum" class="numberbox"></div></div>');
+
+  // create y scale input area.
+  graphConfig.append('<div id="yAxisRangeInput" class="graphConfigChildren">yAxisRangeInput</div>');
+  let yAxisRangeInput = $('#yAxisRangeInput');
+  yAxisRangeInput.append('<div>yMin</div><div><input type="text" id="yMin" class="numberbox"></div>');
+  yAxisRangeInput.append('<div>yMax</div><div><input type="text" id="yMax" class="numberbox"></div>');
+
+  // add bins selector to below yAxisRangeInput.
+  yAxisRangeInput.append('<div>yBinsNum</div><div><input type="text" id="yBinsNum" class="numberbox"></div>');
 }
 
 // radio box statement generator.
