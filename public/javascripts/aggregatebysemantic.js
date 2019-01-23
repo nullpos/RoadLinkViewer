@@ -366,7 +366,7 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
 
   console.log(yScale);
 
-  let color = d3.scaleSequential((t) => { return d3.interpolate('gray', 'steelblue')(t); })
+  let color = d3.scaleSequential((t) => { return d3.interpolate('steelblue', 'red')(t); })
                   .domain([0, d3.max(heatMapData, (row) => { return d3.max(row); })])
 
   svg.selectAll('.row')
