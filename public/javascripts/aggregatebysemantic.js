@@ -59,6 +59,21 @@ $(document).ready(function() {
         return;
       }
       drawHistogram(choraleData, xAxisName, [xMin, xMax], xBinsNum);
+    } else if (graphname === 'heatmap') {
+      let xAxisName = $('input[name="xAxisColumn"]:checked').val();
+      let yAxisName = $('input[name="yAxisColumn"]:checked').val();
+      let xMin = parseFloat($('#xMin').val());
+      let xMax = parseFloat($('#xMax').val());
+      let yMin = parseFloat($('#yMin').val());
+      let yMax = parseFloat($('#yMax').val());
+      let xBinsNum = parseInt($('#xBinsNum').val());
+      let yBinsNum = parseInt($('#yBinsNum').val());
+
+      if (Number.isNaN(xMin) || Number.isNaN(xMax) || Number.isNaN(xBinsNum) || Number.isNaN(yMin) || Number.isNaN(yMax) || Number.isNaN(yBinsNum)) {
+        alert('input number!');
+        return;
+      }
+      drawHeatmap(choraleData, xAxisName, yAxisName, [xMin, xMax], [yMin, yMax], xBinsNum, yBinsNum);
     }
   });
 
@@ -192,6 +207,17 @@ function createConfigForHeatmap(data) {
   // add bins selector to below xAxisRangeInput.
   xAxisRangeInput.append('<div>xBisNum<div><input type="text" id="xBinsNum" class="numberbox"></div></div>');
 
+  // create radio box for select y axis column.
+  graphConfig.append('<div id="yAxisColumnSelector" class="graphConfigChildren">yAxisColumn</div>');
+  let yAxisColumnSelector = $('#yAxisColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = false;
+      if (index == 0) isSetCheck = true;
+      yAxisColumnSelector.append(createRadioBoxStmt('yAxisColumn', columnName, isSetCheck));
+    });
+  }
+
   // create y scale input area.
   graphConfig.append('<div id="yAxisRangeInput" class="graphConfigChildren">yAxisRangeInput</div>');
   let yAxisRangeInput = $('#yAxisRangeInput');
@@ -314,7 +340,7 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
   });
 
   // set drawing area.
-  d3.selectAll('svg')
+  d3.selectAll('#graph svg')
       .remove();
 
   let width = $('#graph').width(),
