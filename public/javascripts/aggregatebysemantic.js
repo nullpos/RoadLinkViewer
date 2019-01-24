@@ -34,6 +34,7 @@ $(document).ready(function() {
         choraleData = data;
         createConfig(choraleData);
         console.log(data[0]);
+        alert('Fetched Data!: data length is ' + data.length);
         // drawHistogram(data, 'count', [0, 500], 20);
         // drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 10, 10);
       })
@@ -80,15 +81,20 @@ $(document).ready(function() {
   $('#submitButton').on('click', () => {
     let query = $('#sqlbox').val();
     query = query.replace(/\n/g, ' ');
+    query = query.replace(/\t/g, ' ');
     console.log(query);
 
     let requestURL = '/query?query=' + query;
-    alert('Sorry, custom sql feature have not been implemented.');
+    // alert('Sorry, custom sql feature have not been implemented.');
 
-    return;
+    // return;
     $.getJSON(requestURL).done((data) => {
       console.log(data);
-    })
+      choraleData = data;
+      alert('Fetched Data!: data length is ' + data.length);
+    }).fail((data) => {
+      alert('Error Occured!');
+    });
   })
 });
 

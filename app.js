@@ -7,6 +7,7 @@ var logger = require('morgan');
 let linkFetcher = require('./utils/linkFetcher.js');
 let semantics = require('./utils/semantic.js');
 let aggregater = require('./utils/aggregater');
+let getQueryResult = require('./utils/query.js').getQueryResult;
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -174,8 +175,15 @@ app.delete('/methods/deletesemantic', (req, res) => {
 
 app.get('/query', (req, res) => {
   let query = req.query.query;
-  console.log(query);
-  res.send({query: query});
+
+  try {
+    getQueryResult(query, (result) => {
+      res.status(200).json(result);
+    });
+  } catch (e) {
+    console.log('error occured.')
+    res.status(400).send({query: query});
+  }
 })
 
 // catch 404 and forward to error handler
