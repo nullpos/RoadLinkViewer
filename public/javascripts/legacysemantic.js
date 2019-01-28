@@ -102,8 +102,6 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
 
     data.features.forEach(function(feature) {
       let linkid = feature.properties.linkid;
-      let semanticid = $('#semanticPulldown').val();
-      let selectedItem = semanticsArray.filter(semantic => semantic.SEMANTIC_LINK_ID == semanticid)[0];
       let popupContent = '<div class=\"popupText\">';
       popupContent += linkid;
       popupContent += '</div>';
@@ -116,7 +114,10 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
       })
         .bindPopup(popup, {})
         .on('click', () => {
+          let semanticid = $('#semanticPulldown').val();
+          let selectedItem = semanticsArray.filter(semantic => semantic.SEMANTIC_LINK_ID == semanticid)[0];
           if (line.attribution.issemantic == 1) {
+            
             console.log('remove ' + linkid + ' from ' + semanticid);
             requestLinkDelete(semanticid, linkid);
             line.attribution.color = '#0000FF';
