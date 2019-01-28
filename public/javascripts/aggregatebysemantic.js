@@ -396,6 +396,24 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
       .attr('opacity', 0.9)
       .attr('fill', (d) => { return color(d); });
 
+  // draw text.
+  svg.selectAll('.labelrow')
+      .data(heatMapData)
+      .enter()
+      .append('g')
+      .attr('class', 'labelrow')
+      .attr('transform', (d, i) => {
+        return 'translate(0, ' + yScale(i) + ')';
+      })
+      .selectAll('.celllabel')
+      .data((d) => { return d })
+      .enter()
+      .append('text')
+      .attr('class', 'celllabel')
+      .attr('x', (d, i) => { return xScale(i) + xScale.bandwidth() / 3; })
+      .attr('y', (d) => { return yScale.bandwidth() / 2; })
+      .text((d) => { return d });
+
   let xAxis = d3.axisBottom(xScale)
                 .tickFormat((i) => {
                   let calc = (index) => { return (index * (xAxisRange[1] - xAxisRange[0]) / xBinsNum + xAxisRange[0]).toFixed(3); }
@@ -407,10 +425,10 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
                   return calc(i);
                 });
   svg.append('g')
-        .attr('transform', 'translate(0, ' + (height - margin.bottom) + ')')
+        .attr('transform', 'translate(' + (-xScale.bandwidth() / 2) + ', ' + (height - margin.bottom) + ')')
         .call(xAxis);
   svg.append('g')
-        .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
+        .attr('transform', 'translate(' + margin.left + ', ' + (yScale.bandwidth() / 2) + ')')
         .call(yAxis);
 
 }
