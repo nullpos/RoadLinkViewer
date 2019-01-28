@@ -6,6 +6,7 @@ let Request = require('tedious').Request;
 
 // Configure file to connect DB.
 let config = require('./config.json');
+let editorConfig = require('./editor.json');
 
 exports.getQueryResult = function(queryStatement, callback) {
   let connection = new Connection(config);
@@ -37,6 +38,26 @@ exports.getQueryResult = function(queryStatement, callback) {
       });
 
       result.push(record);
+    });
+
+    connection.execSql(request);
+  });
+}
+
+exports.runQueryWithoutResult = (querystmt) => {
+  let connection = new Connection(editorConfig);
+
+  connection.on('connect', (err) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    let request = new Request(querystmt, (err, rowCount) => {
+      if (err) {
+        console.log(err);
+      }
+      connection.close();
     });
 
     connection.execSql(request);

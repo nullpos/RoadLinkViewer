@@ -1,4 +1,5 @@
 let getQueryResult = require('./query.js').getQueryResult;
+let runQueryWithoutResult = require('./query.js').runQueryWithoutResult;
 
 function makeSemanticListQuery() {
   // make semantic list.
@@ -31,8 +32,6 @@ exports.fetchSemanticList = (callback) => {
 }
 
 exports.createSemantics = (semanticId, driverId, linkId, semantics, callback) => {
-  getQueryResult(makeCreateSemanticQuery(semanticId, driverId, linkId, semantics), (result) => {
-    console.log(result);
-    callback(200, {'result': result});
-  })
+  runQueryWithoutResult(makeCreateSemanticQuery(semanticId, driverId, linkId, semantics));
+  callback(200, {result: 'succeeded.'});
 }
