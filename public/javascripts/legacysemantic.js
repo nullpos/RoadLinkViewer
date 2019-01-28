@@ -43,26 +43,45 @@ $(document).ready(function() {
       $('#newSemanticForms').append('Semantic id <input id="newSemanticId" type="text">');
       $('#newSemanticForms').append('Semantic name <input id="newSemanticName" type="text">');
       $('#newSemanticForms').append('Semantic driver <input id="newSemanticDriverId" type="text">');
+    } else {
+      // delete new semantic form.
+      $('#newSemanticForms').remove();
     }
   })
 });
 
-function createSemanticPulldown() {
+function createSemanticPulldown(selectid) {
   let requestURL = '/json/legacy/semanticlist/';
   $.getJSON(requestURL).done(function(data) {
     semanticsArray = data;
     console.log(semanticsArray);
     let semanticPulldown = $('#semanticPulldown');
     semanticPulldown.empty();
-    semanticPulldown.append('<option value="0" selected>---</option>');
+
+    if (!selectid) {
+      semanticPulldown.append('<option value="0" selected>---</option>');
+    } else {
+      semanticPulldown.append('<option value="0">---</option>');
+    }
+    
 
     data.forEach((record) => {
       let id = record.SEMANTIC_LINK_ID;
       let semantics = record.SEMANTICS;
-      semanticPulldown.append('<option value="' + id + '">' + id + ': ' + semantics + '</option>');
+
+      if (selectid && id == selectid) {
+        semanticPulldown.append('<option value="' + id + '" selected>' + id + ': ' + semantics + '</option>');
+      } else {
+        semanticPulldown.append('<option value="' + id + '">' + id + ': ' + semantics + '</option>');
+      }
+      
     });
 
     semanticPulldown.append('<option value="-1">Create new Semantics</option>');
+
+    if (selectid) {
+      $('#newSemanticForms').remove();
+    }
   })
 }
 
@@ -101,6 +120,8 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
             console.log('remove ' + linkid + ' from ' + semanticid);
             requestLinkDelete(semanticid, linkid);
             line.attribution.color = '#0000FF';
+            // After deleting, change attribute.
+            line.attribution.issemantic = 0;
           } else if (semanticid == -1) {
             // new Semantics
             // validate form value
@@ -126,9 +147,14 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd, semantic
             // value was validated.
             requestLinkCreate(newSemanticId, newSemanticName, newSemanticDriverId, linkid);
             line.attribution.color = '#FF0000';
+            line.attribution.issemantic = 1;
+
+            // Remake semantic pulldown to add new semantics.
+            createSemanticPulldown(newSemanticId);
           } else if (semanticid != 0) {
             requestLinkCreate(semanticid, selectedItem.SEMANTICS, selectedItem.DRIVER_ID, linkid);
             line.attribution.color = '#FF0000';
+            line.attribution.issemantic = 1;
           }
         })
         .on('popupopen', () => {
