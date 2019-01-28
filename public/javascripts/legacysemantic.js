@@ -40,9 +40,9 @@ $(document).ready(function() {
     if (semanticid == '-1') {
       // display new semantic form.
       $('#rightcolumn').append('<div id="newSemanticForms"></div>');
-      $('#newSemanticForms').append('Semantic id <input id="newSemanticId" type="text">');
-      $('#newSemanticForms').append('Semantic name <input id="newSemanticName" type="text">');
-      $('#newSemanticForms').append('Semantic driver <input id="newSemanticDriverId" type="text">');
+      $('#newSemanticForms').append('<div>Semantic id<br> <input id="newSemanticId" type="text"></div>');
+      $('#newSemanticForms').append('<div>Semantic name<br> <input id="newSemanticName" type="text"></div>');
+      $('#newSemanticForms').append('<div>Semantic driver<br> <input id="newSemanticDriverId" type="text"></div');
     } else {
       // delete new semantic form.
       $('#newSemanticForms').remove();
