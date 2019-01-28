@@ -170,7 +170,15 @@ app.post('/methods/createsemantic', (req, res) => {
 })
 
 app.delete('/methods/deletesemantic', (req, res) => {
-  res.status(200).send(req.query);
+  let semanticId = req.query.semanticid;
+  let linkId = req.query.linkid;
+  if (semanticId && linkId) {
+    semantics.deleteSemantics(semanticId, linkId, (status, result) => {
+      res.status(status).send(result);
+    });
+  } else {
+    res.status(400).send(req.query);
+  }
 })
 
 app.get('/query', (req, res) => {
