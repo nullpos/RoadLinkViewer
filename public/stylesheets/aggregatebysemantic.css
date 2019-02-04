@@ -13,7 +13,7 @@ body {
 }
 
 #mapGraphContainer {
-  height: 50%;
+  height: 60%;
   display: flex;
   padding-top: 5px;
   padding-bottom: 5px;
@@ -31,7 +31,7 @@ body {
 }
 
 #configContainer {
-  height: 40%;
+  height: 30%;
   width: 100%;
   padding-top: 5px;
   padding-bottom: 5px;
