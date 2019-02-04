@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-  let map = L.map('map').setView([35.3973359, 139.4651749], 17);
+  let map = L.map('map').setView([35.47235785,	139.58691997], 13);
   let lines = L.layerGroup().addTo(map);
   let choraleData = [];
 
@@ -20,7 +20,7 @@ $(document).ready(function() {
     let semanticid = $('#semanticPulldown').val();
 
     if (semanticid != -1) {
-      drawSemantic(lines, semanticid);
+      drawSemantic(map, lines, semanticid);
     }
   })
 
@@ -116,7 +116,7 @@ function createSemanticPulldown() {
   })
 }
 
-function drawSemantic(lines, semanticid) {
+function drawSemantic(map, lines, semanticid) {
   // No semantic specified, not need request.
   if (!semanticid) {
     return;
@@ -129,6 +129,9 @@ function drawSemantic(lines, semanticid) {
   $.getJSON(requestURL).done(function(data) {
     console.log(data);
     lines.clearLayers();
+
+    // move map view to semantic link.
+    map.setView(data.features[0].geometry.coordinates[0]);
 
     data.features.forEach(function(feature) {
       
