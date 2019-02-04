@@ -435,3 +435,64 @@ function drawHeatmap(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, xBi
         .call(yAxis);
 
 }
+
+// draw scatter function
+function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, colorColumn, isContinuousColor) {
+  // set drawing area.
+  d3.selectAll('#graph svg')
+    .remove();
+
+  let width = $('#graph').width(),
+      height = $('#graph').height(),
+      margin = {
+        top: 10,
+        bottom: 50,
+        left:50,
+        right: 10
+      };
+
+  let svg = d3.select('#graph').append('svg')
+              .attr('width', width)
+              .attr('height', height);
+
+  let xScale = d3.scaleLinear()
+                  .range([margin.left, width - margin.right - margin.left])
+                  .domain(xAxisRange);
+  let yScale = d3.scaleLinear()
+                  .range([height - margin.top - margin.bottom, margin.top])
+                  .domain(yAxisRange);
+
+  let color;
+  if (isContinuousColor) {
+    // continuous scale color
+    
+    color = d3.scaleSequential(d3.interpolateGnBu)
+              .domain([ d3.min(data, (row) => { return row[colorColumn]; }), d3.max(data, (row) => { return row[colorColumn]; }) ]);
+  } else {
+    // ordinal color scale
+    color = d3.scaleOrdinal().range(d3.schemeCategory10);
+  }
+
+  // draw plots.
+  svg.selectAll('circle')
+      .data(data)
+      .enter().append('circle')
+        .attr('cx', (d) => {
+          return xScale(d[xAxisColumn]);
+        })
+        .attr('cy', (d) => {
+          return yScale(d[yAxisColumn]);
+        })
+        .attr('fill', (d) => {
+          return color(d[colorColumn]);
+        })
+
+  // draw x axis.
+  svg.append('g')
+        .attr('transform', 'transrate(' + margin.left + ', ' + (height - margin.bottom - margin.top) + ')')
+        .call(d3.axisBottom(xScale));
+
+  svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
+        .call(d3.axisLeft(yScale));
+}
