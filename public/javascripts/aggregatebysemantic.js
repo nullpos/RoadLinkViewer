@@ -75,6 +75,31 @@ $(document).ready(function() {
         return;
       }
       drawHeatmap(choraleData, xAxisName, yAxisName, [xMin, xMax], [yMin, yMax], xBinsNum, yBinsNum);
+    } else if (graphname === 'scatter') {
+      let xAxisName = $('input[name="xAxisColumn"]:checked').val();
+      let yAxisName = $('input[name="yAxisColumn"]:checked').val();
+      let colorName = $('input[name="colorColumn"]:checked').val();
+      let colorType = $('input[name="colorType"]:checked').val();
+      let isContinuousColor;
+      if (colorType === 'continuous') {
+        isContinuousColor = true;
+      } else if (colorType === 'ordinal') {
+        isContinuousColor = false;
+      } else {
+        alert('something wrong with setup color type.');
+        return;
+      }
+      let xMin = parseFloat($('#xMin').val());
+      let xMax = parseFloat($('#xMax').val());
+      let yMin = parseFloat($('#yMin').val());
+      let yMax = parseFloat($('#yMax').val());
+
+      let isNaN = Number.isNaN;
+      if (isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) {
+        alert('input number!');
+        return;
+      }
+      drawScatter(choraleData, xAxisName, yAxisName, [xMin, xMax], [yMin, yMax], colorName, isContinuousColor);
     }
   });
 
@@ -157,6 +182,8 @@ function createConfig(choraleData) {
     createConfigForHistogram(choraleData);
   } else if (graphname === 'heatmap') {
     createConfigForHeatmap(choraleData);
+  } else if (graphname === 'scatter') {
+    createConfigForScatter(choraleData);
   }
 }
 
@@ -235,6 +262,69 @@ function createConfigForHeatmap(data) {
 
   // add bins selector to below yAxisRangeInput.
   yAxisRangeInput.append('<div>yBinsNum</div><div><input type="text" id="yBinsNum" class="numberbox"></div>');
+}
+
+function createConfigForScatter(data) {
+  let graphConfig = $('#graphConfig');
+  // clear element.
+  graphConfig.empty();
+
+  // create radio box for select x axis column.
+  graphConfig.append('<div id="xAxisColumnSelector" class="graphConfigChildren">xAxisColumn</div>');
+  let xAxisColumnSelector = $('#xAxisColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = false;
+      if (index == 0) {
+        isSetCheck = true;
+      }
+      xAxisColumnSelector.append(createRadioBoxStmt('xAxisColumn', columnName, isSetCheck));
+    });
+  }
+
+  // create x scale input area.
+  graphConfig.append('<div id="xAxisRangeInput" class="graphConfigChildren">xAxisRangeInput</div>');
+  let xAxisRangeInput = $('#xAxisRangeInput');
+  xAxisRangeInput.append('<div>xMin<div><input type="text" id="xMin" class="numberbox"></div></div>');
+  xAxisRangeInput.append('<div>xMax<div><input type="text" id="xMax" class="numberbox"></div></div>');
+
+  // create radio box for select y axis column.
+  graphConfig.append('<div id="yAxisColumnSelector" class="graphConfigChildren">yAxisColumn</div>');
+  let yAxisColumnSelector = $('#yAxisColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = false;
+      if (index == 0) {
+        isSetCheck = true;
+      }
+      yAxisColumnSelector.append(createRadioBoxStmt('yAxisColumn', columnName, isSetCheck));
+    });
+  }
+
+  // create y scale input area.
+  graphConfig.append('<div id="yAxisRangeInput" class="graphConfigChildren">yAxisRangeInput</div>');
+  let yAxisRangeInput = $('#yAxisRangeInput');
+  yAxisRangeInput.append('<div>yMin<div><input type="text" id="yMin" class="numberbox"></div></div>');
+  yAxisRangeInput.append('<div>yMax<div><input type="text" id="yMax" class="numberbox"></div></div>');
+
+  // create radio box for select column for plot color.
+  graphConfig.append('<div id="colorColumnSelector" class="graphConfigChildren">colorColumn</div>');
+  let colorColumnSelector = $('#colorColumnSelector');
+  if (data.length > 0) {
+    Object.keys(data[0]).forEach((columnName, index) => {
+      let isSetCheck = true;
+      if (index == 0) {
+        isSetCheck = true;
+      }
+      colorColumnSelector.append(createRadioBoxStmt('colorColumn', columnName, isSetCheck));
+    })
+  }
+
+  // create radio box ask color column is continuous or ordinarl
+  graphConfig.append('<div id="colorTypeSelector" class="graphConfigChildren">colorColumnType</div>');
+  let colorTypeSelector = $('#colorTypeSelector');
+  colorTypeSelector.append('<div><input type="radio" name="colorType" value="continuous" checked><label for="colorType">continuous</label></div>');
+  colorTypeSelector.append('<div><input type="radio" name="colorType" value="ordinal"><label for="colorType">ordinal</label></div>');
 }
 
 // radio box statement generator.
@@ -466,7 +556,7 @@ function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, col
   if (isContinuousColor) {
     // continuous scale color
     
-    color = d3.scaleSequential(d3.interpolateGnBu)
+    color = d3.scaleSequential(d3.interpolateOranges)
               .domain([ d3.min(data, (row) => { return row[colorColumn]; }), d3.max(data, (row) => { return row[colorColumn]; }) ]);
   } else {
     // ordinal color scale
@@ -486,10 +576,12 @@ function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, col
         .attr('fill', (d) => {
           return color(d[colorColumn]);
         })
+        .attr('r', 3)
+        .attr('opacity', '0.5');
 
   // draw x axis.
   svg.append('g')
-        .attr('transform', 'transrate(' + margin.left + ', ' + (height - margin.bottom - margin.top) + ')')
+        .attr('transform', 'translate(' + 0 + ', ' + (height - margin.bottom - margin.top) + ')')
         .call(d3.axisBottom(xScale));
 
   svg.append('g')
