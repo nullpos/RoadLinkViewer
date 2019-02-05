@@ -7,7 +7,7 @@ function makeCHORALEQuery(semanticid, direction, option) {
   }
 
   let query = '';
-  query += 'SELECT  COUNT(*) AS count, ';
+  query += 'SELECT  COUNT(*) AS elapsedtime, ';
   query += '        SUM(e.LOST_ENERGY) AS lost, ';
   query += '        SUM(e.CONVERT_LOSS) AS convert_loss, ';
   query += '        SUM(e.ENERGY_BY_AIR_RESISTANCE) AS air_loss, ';

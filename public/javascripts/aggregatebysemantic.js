@@ -37,7 +37,38 @@ $(document).ready(function() {
         alert('Fetched Data!: data length is ' + data.length);
         // drawHistogram(data, 'count', [0, 500], 20);
         // drawHeatmap(data, 'count', 'lost', [0.0, 400.0], [0.0, 0.3], 10, 10);
-      })
+      });
+
+      // create template sql.
+      let template = ''
+      template += 'SELECT\n';
+      template += '  COUNT(*) AS elapsedtime\n';
+      template += '  ,SUM(e.LOST_ENERGY) AS lost\n';
+      template += '  ,SUM(e.CONVERT_LOSS) AS convert_loss\n';
+      template += '  ,SUM(e.ENERGY_BY_AIR_RESISTANCE) AS air_loss\n';
+      template += '  ,SUM(e.ENERGY_BY_ROLLING_RESISTANCE) AS rolling_loss\n';
+      template += '  ,SUM(ABS(e.REGENE_LOSS)) AS regene_loss\n';
+      template += '  ,SUM(ABS(e.REGENE_ENERGY)) AS regene_energy\n';
+      template += 'FROM\n';
+      template += '  ECOLOG_Doppler AS e\n';
+      template += '  INNER JOIN SEMANTIC_LINKS AS sl ON e.LINK_ID = sl.LINK_ID\n';
+      template += '  INNER JOIN TRIPS_Doppler AS t ON e.TRIP_ID = t.TRIP_ID\n';
+      template += 'WHERE\n';
+      template += '  sl.SEMANTIC_LINK_ID = \'' + semanticid + '\'\n';
+      template += '  AND  t.TRIP_DIRECTION = \'' + direction + '\'\n';
+      template += '  AND  t.SENSOR_ID = (\n';
+      template += '         SELECT\n';
+      template += '           MAX(SENSOR_ID)\n';
+      template += '         FROM\n';
+      template += '           TRIPS_Doppler AS it\n';
+      template += '         WHERE\n';
+      template += '           t.TRIP_DIRECTION = it.TRIP_DIRECTION\n';
+      template += '           AND  CONVERT(VARCHAR, t.START_TIME, 111) = CONVERT(VARCHAR, it.START_TIME, 111)\n'
+      template += '       )\n';
+      template += 'GROUP BY\n';
+      template += '  t.TRIP_ID';
+
+      $('#sqlbox').val(template);
     }
   })
 
@@ -116,6 +147,7 @@ $(document).ready(function() {
     $.getJSON(requestURL).done((data) => {
       console.log(data);
       choraleData = data;
+      createConfig(choraleData);
       alert('Fetched Data!: data length is ' + data.length);
     }).fail((data) => {
       alert('Error Occured!');
