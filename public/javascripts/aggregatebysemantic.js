@@ -585,6 +585,7 @@ function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, col
                   .domain(yAxisRange);
 
   let color;
+  let legend;
   if (isContinuousColor) {
     // continuous scale color
     
@@ -592,7 +593,31 @@ function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, col
               .domain([ d3.min(data, (row) => { return row[colorColumn]; }), d3.max(data, (row) => { return row[colorColumn]; }) ]);
   } else {
     // ordinal color scale
-    color = d3.scaleOrdinal().range(d3.schemeCategory10);
+    let uniquelist = [];
+    data.forEach((d) => {
+      if (uniquelist.indexOf(d[colorColumn]) === -1) {
+        uniquelist.push(d[colorColumn]);
+      }
+    });
+
+    color = d3.scaleOrdinal()
+              .domain(uniquelist)
+              .range(d3.schemeCategory10);
+
+    svg.selectAll('circle')
+    .data(uniquelist)
+    .enter().append('circle')
+    .attr('cx', margin.left + 10)
+    .attr('cy', (d, i) => { return margin.top + i * 20})
+    .attr('fill', (d) => { return color(d) })
+    .attr('r', 5);
+    
+    svg.selectAll('text')
+      .data(uniquelist)
+      .enter().append('text')
+      .attr('y', (d, i) => { return margin.top + i * 20 + 5})
+      .attr('x', margin.left + 30)
+      .text((d) => { return d });
   }
 
   // draw plots.
@@ -619,4 +644,6 @@ function drawScatter(data, xAxisColumn, yAxisColumn, xAxisRange, yAxisRange, col
   svg.append('g')
         .attr('transform', 'translate(' + margin.left + ', ' + 0 + ')')
         .call(d3.axisLeft(yScale));
+  
+  
 }
