@@ -51,6 +51,28 @@ function makeLineStringQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
   return query;
 }
 
+function makeLineStringQuery2019(latStart, lngStart, latEnd, lngEnd) {
+  // make query to draw polyline.
+  // make query to fetch vertices
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
+
+  let query = '';
+  query += 'SELECT  LINK_ID, ';
+  query += '        NUM, ';
+  query += '        LATITUDE, ';
+  query += '        LONGITUDE ';
+  query += 'FROM    LINKS_GSI20 ';
+  query += 'WHERE   LINK_ID IN ( ';
+  query += '          SELECT  DISTINCT LINK_ID ';
+  query += '          FROM    LINKS_GSI20 ';
+  query += '          WHERE   LATITUDE ' + latBetweenStmt + ' ';
+  query += '            AND   LONGITUDE ' + lngBetweenStmt + ' ';
+  query += '        )';
+  query += 'ORDER BY LINK_ID, NUM';
+  return query;
+}
+
 function makeLinkFetchQueryGSI20(latStart, lngStart, latEnd, lngEnd) {
   // make query to get link.
 
@@ -192,6 +214,14 @@ exports.fetchEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback)
 
 exports.fetchLineString = function(latStart, lngStart, latEnd, lngEnd, callback) {
   let querystmt = makeLineStringQueryLegacy(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+    callback(makeLineStringGeoJson(result));
+  })
+}
+
+exports.fetch2019LineString = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeLineStringQuery2019(latStart, lngStart, latEnd, lngEnd);
 
   getQueryResult(querystmt, function(result) {
     callback(makeLineStringGeoJson(result));

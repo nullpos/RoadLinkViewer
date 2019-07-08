@@ -1,0 +1,16 @@
+extends layout
+
+append stylesheet
+  link(rel='stylesheet', href='/stylesheets/2019linestring.css')
+
+block content
+  h1= title
+  #centerPoint
+  #zoomValue
+
+  #mapInfoContainer
+    #map
+    #rightcolumn
+      #layersInfo
+
+  script(src='/javascripts/2019linestring.js')
