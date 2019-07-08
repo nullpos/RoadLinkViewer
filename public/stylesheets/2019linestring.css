@@ -31,6 +31,7 @@ a {
 
 #layersInfo {
   height: 90%;
+  width: 100%;
   border-style: solid;
   border-width: 1px;
   overflow: auto;
