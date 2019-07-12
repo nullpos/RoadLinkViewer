@@ -1,10 +1,129 @@
 let highlighted = []
 
-$(document).ready(function() {
+let linkSearcher
+class LinkSearcher {
+  constructor(map, lines, vertices) {
+    this.map = map
+    this.vertices = vertices
+    this.lines = lines
+    this.markers = []
+    this.linkIDs = []
+  }
+
+  clicked(e) {
+    const linkID = e.target.attribution
+    const index = this.linkIDs.indexOf(linkID)
+    if(index === -1) {
+      this.add(e)
+      if(this.markers.length > 1) {
+        const markerLength = this.markers.length
+        this.search(markerLength - 2, markerLength - 1)
+      }
+    } else {
+      this.delete(e)
+      highlighted = []
+      $('#layersInfo').val("")
+      for(let i = 0; i < this.markers.length - 1; i++) {
+        this.search(i, i+1)
+      }
+    }
+  }
+
+  get edgeLatLng() {
+    const edge = {
+      latStart: 999, latEnd: -999,
+      lngStart: 999, lngEnd: -999,
+    }
+    for(let i in this.markers) {
+      const latlng = this.markers[i]._latlng
+      if(edge.latStart > latlng.lat) edge.latStart = latlng.lat - 0.1
+      if(edge.latEnd   < latlng.lat) edge.latEnd   = latlng.lat + 0.1
+      if(edge.lngStart > latlng.lng) edge.lngStart = latlng.lng - 0.1
+      if(edge.lngEnd   < latlng.lng) edge.lngEnd   = latlng.lng + 0.1
+    }
+    return edge
+  }
+
+  add(e) {
+    const linkID = e.target.attribution
+    const marker = L.marker(e.latlng, {alt: linkID})
+    this.markers.push(marker)
+    this.linkIDs.push(linkID)
+    marker.addTo(this.map)
+      .bindPopup(`${this.markers.length}`)
+      .openPopup()
+  }
+
+  delete(e) {
+    const linkID = e.target.attribution
+    const index = this.linkIDs.indexOf(linkID)
+    this.map.removeLayer(this.markers[index])
+    this.markers.splice(index, 1)
+    this.linkIDs.splice(index, 1)
+  }
+
+  search(startIdx, endIdx) {
+    const edge = this.edgeLatLng
+    const fetchURL = `/json/gsi20/links/edge/?latstart=${edge.latStart}&lngstart=${edge.lngStart}&latend=${edge.latEnd}&lngend=${edge.lngEnd}`
+
+    fetch(fetchURL).then((response) => {
+      return response.json()
+    }).then((json) => {
+      const searchedLinksNum = []
+      const queue = []
+      const first = json.filter((v, i, a) => {
+        return v.LINK_ID1 === this.markers[startIdx].options.alt
+      })[0]
+      queue.push({
+        link: first,
+        parent: [first.LINK_ID1]
+      })
+      while(true) {
+        const now = queue.shift()
+        // search incomplete :(
+        if(now === undefined) {
+          $('#layersInfo').val("error")
+          break
+        }
+        // search complete :)
+        if(now.link.LINK_ID1 === this.markers[endIdx].options.alt) {
+          const parents = now.parent.concat()
+          highlighted = highlighted.concat(parents)
+          highlighted.push(now.link.LINK_ID1)
+          $('#layersInfo').val(highlighted.join(",\n"))
+          break
+        }
+        searchedLinksNum.push(now.link.NUM1)
+        const nextLinks = json.filter((v, i, a) => {
+          return ((v.LATITUDE1 === now.link.LATITUDE1) && (v.LONGITUDE1 === now.link.LONGITUDE1)) ||
+          ((v.LATITUDE2 === now.link.LATITUDE2) && (v.LONGITUDE2 === now.link.LONGITUDE2)) ||
+          ((v.LATITUDE1 === now.link.LATITUDE2) && (v.LONGITUDE1 === now.link.LONGITUDE2)) ||
+          ((v.LATITUDE2 === now.link.LATITUDE1) && (v.LONGITUDE2 === now.link.LONGITUDE1))
+        })
+        for(let i in nextLinks) {
+          if(searchedLinksNum.indexOf(nextLinks[i].NUM1) === -1) {
+            const parent = now.parent.slice()
+            if(parent.indexOf(now.link.LINK_ID1) === -1) {
+              parent.push(now.link.LINK_ID1)
+            }
+            queue.push({
+              link: nextLinks[i],
+              parent: parent
+            })
+            searchedLinksNum.push(nextLinks[i].NUM1)
+          }
+        }
+      }
+    })
+  }
+}
+
+$(document).ready(() => {
   const map = L.map('map').setView([43.46326112204825, 143.75189781188968], 17)
   const vertices = L.layerGroup().addTo(map)
   const lines = L.layerGroup().addTo(map)
   const zoomThreshold = 14
+  linkSearcher = new LinkSearcher(map, lines, vertices)
 
   L.tileLayer(
     'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -32,6 +151,7 @@ $(document).ready(function() {
 
   $('#layersInfo').on('change', (e) => {
     highlighted = e.target.value.replace(/\r?\n/g, '').split(',')
+    drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001)
   })
 })
 
@@ -67,6 +187,9 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
             highlighted.push(line.attribution)
           }
           $('#layersInfo').val(highlighted.join(",\n"))
+        })
+        .on('contextmenu', (e) => {
+          linkSearcher.clicked(e)
         })
       line.attribution = feature.properties.linkid
       lines.addLayer(line)
