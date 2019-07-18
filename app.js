@@ -51,6 +51,12 @@ app.get('/legacylinestring', function(req, res) {
   });
 });
 
+app.get('/2019linestring', function(req, res) {
+  res.render('2019linestring', {
+    title: '2019LineStrings'
+  });
+});
+
 app.get('/legacysemantic', (req, res) => {
   res.render('legacysemantic', {
     title: 'Semantic Editor'
@@ -148,6 +154,16 @@ app.get('/json/legacy/semantics/', function(req, res) {
     })
   }
 });
+
+app.get('/json/2019/linestring/', function(req, res) {
+  linkFetcher.fetch2019LineString(req.query.latstart,
+                              req.query.lngstart,
+                              req.query.latend,
+                              req.query.lngend,
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
 
 app.post('/methods/createsemantic', (req, res) => {
   let semanticId = req.body.semanticid;

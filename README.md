@@ -19,6 +19,26 @@ Create utils/config.json to access database.
 
 ## Usage
 
+First, make 2 files for authenticate DB access into `utils/`.
+Example:
+```
+utils/config.json
+{
+    "server": "DBName",
+    "userName": "username",
+    "password": "password"
+}
+```
+```
+utils/editor.json
+{
+    "server": "DBName",
+    "userName": "username",
+    "password": "password"
+}
+```
+The user may have write permission in `editor.json`.
+
 To start app, run `npm start`.  
 Then access localhost:3000/ or localhost:3000/edge/ with Google Chrome.  
 
