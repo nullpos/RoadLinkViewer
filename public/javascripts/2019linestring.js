@@ -62,6 +62,10 @@ class LinkSearcher {
     this.linkIDs.splice(index, 1)
   }
 
+  norm(latlng1, latlng2) {
+    return Math.sqrt(Math.pow(latlng1.lat - latlng2.lat, 2) + Math.pow(latlng1.lng - latlng2.lng, 2))
+  }
+
   search(startIdx, endIdx) {
     const edge = this.edgeLatLng
     const fetchURL = `/json/gsi20/links/edge/?latstart=${edge.latStart}&lngstart=${edge.lngStart}&latend=${edge.latEnd}&lngend=${edge.lngEnd}`
@@ -71,34 +75,50 @@ class LinkSearcher {
     }).then((json) => {
       const searchedLinksNum = []
       const queue = []
+      const completedLinks = []
       const first = json.filter((v, i, a) => {
         return v.LINK_ID1 === this.markers[startIdx].options.alt
       })[0]
       queue.push({
         link: first,
-        parent: [first.LINK_ID1]
+        parent: [first.LINK_ID1],
+        distance: 0.0
       })
       while(true) {
         const now = queue.shift()
-        // search incomplete :(
+        // search finished
         if(now === undefined) {
-          $('#layersInfo').val("error")
-          break
-        }
-        // search complete :)
-        if(now.link.LINK_ID1 === this.markers[endIdx].options.alt) {
-          const parents = now.parent.concat()
+          // no links found
+          if(completedLinks.length === 0) {
+            $('#layersInfo').val("error")
+            break
+          }
+          // found links
+          let minDistance = Infinity
+          let minLink = null
+          for(let i in completedLinks) {
+            if(completedLinks[i].distance < minDistance) {
+              minDistance = completedLinks[i].distance
+              minLink = completedLinks[i]
+            }
+          }
+          const parents = minLink.parent.concat()
           highlighted = highlighted.concat(parents)
-          highlighted.push(now.link.LINK_ID1)
+          highlighted.push(minLink.link.LINK_ID1)
           $('#layersInfo').val(highlighted.join(",\n"))
           break
+        }
+        // found a complete link
+        if(now.link.LINK_ID1 === this.markers[endIdx].options.alt) {
+          completedLinks.push(now)
+          continue
         }
         searchedLinksNum.push(now.link.NUM1)
         const nextLinks = json.filter((v, i, a) => {
           return ((v.LATITUDE1 === now.link.LATITUDE1) && (v.LONGITUDE1 === now.link.LONGITUDE1)) ||
-          ((v.LATITUDE2 === now.link.LATITUDE2) && (v.LONGITUDE2 === now.link.LONGITUDE2)) ||
-          ((v.LATITUDE1 === now.link.LATITUDE2) && (v.LONGITUDE1 === now.link.LONGITUDE2)) ||
-          ((v.LATITUDE2 === now.link.LATITUDE1) && (v.LONGITUDE2 === now.link.LONGITUDE1))
+                 ((v.LATITUDE1 === now.link.LATITUDE2) && (v.LONGITUDE1 === now.link.LONGITUDE2)) ||
+                 ((v.LATITUDE2 === now.link.LATITUDE2) && (v.LONGITUDE2 === now.link.LONGITUDE2)) ||
+                 ((v.LATITUDE2 === now.link.LATITUDE1) && (v.LONGITUDE2 === now.link.LONGITUDE1))
         })
         for(let i in nextLinks) {
           if(searchedLinksNum.indexOf(nextLinks[i].NUM1) === -1) {
@@ -108,7 +128,12 @@ class LinkSearcher {
             }
             queue.push({
               link: nextLinks[i],
-              parent: parent
+              parent: parent,
+              distance: now.distance + this.norm({
+                lat: nextLinks[i].LATITUDE1, lng: nextLinks[i].LONGITUDE1
+              }, {
+                lat: nextLinks[i].LATITUDE2, lng: nextLinks[i].LONGITUDE2
+              })
             })
             searchedLinksNum.push(nextLinks[i].NUM1)
           }
