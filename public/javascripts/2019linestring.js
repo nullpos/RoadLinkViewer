@@ -178,6 +178,11 @@ $(document).ready(() => {
     highlighted = e.target.value.replace(/\r?\n/g, '').split(',')
     drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001)
   })
+
+  $('#btnReverse').on('click', (e) => {
+    highlighted = highlighted.reverse()
+    $('#layersInfo').val(highlighted.join(",\n"))
+  })
 })
 
 function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
