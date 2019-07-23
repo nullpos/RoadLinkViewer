@@ -1,3 +1,5 @@
+import { Link } from "./model.js";
+
 let highlighted = []
 
 let linkSearcher
@@ -16,8 +18,7 @@ class LinkSearcher {
     if(index === -1) {
       this.add(e)
       if(this.markers.length > 1) {
-        const markerLength = this.markers.length
-        this.search(markerLength - 2, markerLength - 1)
+        this.search(this.markers.length - 2, this.markers.length - 1)
       }
     } else {
       this.delete(e)
@@ -62,10 +63,6 @@ class LinkSearcher {
     this.linkIDs.splice(index, 1)
   }
 
-  norm(latlng1, latlng2) {
-    return Math.sqrt(Math.pow(latlng1.lat - latlng2.lat, 2) + Math.pow(latlng1.lng - latlng2.lng, 2))
-  }
-
   search(startIdx, endIdx) {
     const edge = this.edgeLatLng
     const fetchURL = `/json/gsi20/links/edge/?latstart=${edge.latStart}&lngstart=${edge.lngStart}&latend=${edge.latEnd}&lngend=${edge.lngEnd}`
@@ -76,12 +73,11 @@ class LinkSearcher {
       const searchedLinksNum = []
       const queue = []
       const completedLinks = []
-      const first = json.filter((v, i, a) => {
-        return v.LINK_ID1 === this.markers[startIdx].options.alt
-      })[0]
+      const links = json.map((v, i, a) => new Link(v))
+      const first = links.filter((v, i, a) => v.linkID === this.markers[startIdx].options.alt )[0]
       queue.push({
         link: first,
-        parent: [first.LINK_ID1],
+        parent: [first.linkID],
         distance: 0.0
       })
       while(true) {
@@ -94,52 +90,119 @@ class LinkSearcher {
             break
           }
           // found links
-          let minDistance = Infinity
-          let minLink = null
+          // weight algorithm
+          let minDistance = Infinity, minLink = null
           for(let i in completedLinks) {
             if(completedLinks[i].distance < minDistance) {
               minDistance = completedLinks[i].distance
               minLink = completedLinks[i]
             }
           }
-          const parents = minLink.parent.concat()
-          highlighted = highlighted.concat(parents)
-          highlighted.push(minLink.link.LINK_ID1)
+          highlighted = highlighted.concat(minLink.parent, minLink.link.linkID)
           $('#layersInfo').val(highlighted.join(",\n"))
           break
         }
         // found a complete link
-        if(now.link.LINK_ID1 === this.markers[endIdx].options.alt) {
+        if(now.link.linkID === this.markers[endIdx].options.alt) {
           completedLinks.push(now)
           continue
         }
         searchedLinksNum.push(now.link.NUM1)
-        const nextLinks = json.filter((v, i, a) => {
-          return ((v.LATITUDE1 === now.link.LATITUDE1) && (v.LONGITUDE1 === now.link.LONGITUDE1)) ||
-                 ((v.LATITUDE1 === now.link.LATITUDE2) && (v.LONGITUDE1 === now.link.LONGITUDE2)) ||
-                 ((v.LATITUDE2 === now.link.LATITUDE2) && (v.LONGITUDE2 === now.link.LONGITUDE2)) ||
-                 ((v.LATITUDE2 === now.link.LATITUDE1) && (v.LONGITUDE2 === now.link.LONGITUDE1))
-        })
+        const nextLinks = links.filter((v, i, a) => now.link.isConnected(v))
         for(let i in nextLinks) {
           if(searchedLinksNum.indexOf(nextLinks[i].NUM1) === -1) {
             const parent = now.parent.slice()
-            if(parent.indexOf(now.link.LINK_ID1) === -1) {
-              parent.push(now.link.LINK_ID1)
+            if(parent.indexOf(now.link.linkID) === -1) {
+              parent.push(now.link.linkID)
             }
             queue.push({
               link: nextLinks[i],
               parent: parent,
-              distance: now.distance + this.norm({
-                lat: nextLinks[i].LATITUDE1, lng: nextLinks[i].LONGITUDE1
-              }, {
-                lat: nextLinks[i].LATITUDE2, lng: nextLinks[i].LONGITUDE2
-              })
+              distance: now.distance + nextLinks[i].distance
             })
             searchedLinksNum.push(nextLinks[i].NUM1)
           }
         }
       }
     })
+  }
+}
+
+let listBox
+class ListBox {
+  constructor() {
+    this.$dom = $("#links")
+    this.LOCAL_KEY = "LINKS"
+    const localData = localStorage.getItem(this.LOCAL_KEY)
+    this.links = []
+    if(localData !== null && localData.length !== 0) {
+      this.links = JSON.parse(localData)
+    }
+    this.updateList()
+  }
+
+  save() {
+    localStorage.setItem(this.LOCAL_KEY, JSON.stringify(this.links))
+  }
+
+  add() {
+    const ids = $("#layersInfo").val().replace(/[\n\r]/g, "").split(",")
+    let name = prompt("Please enter links name", "Anonymouse")
+    if(name === null || name === "") {
+      name = "Anonymouse"
+    }
+    this.links.push({
+      name: name,
+      ids: ids
+    })
+    this.save()
+    this.updateList()
+  }
+
+  delete() {
+    const idsText = $("#layersInfo").val().replace(/[\n\r]/g, "").split(",").toString()
+    for(let i in this.links) {
+      if(this.links[i].ids.toString() === idsText) {
+        this.links.splice(i, 1)
+        break
+      }
+    }
+    this.save()
+    this.updateList()
+    $("#layersInfo").val("")
+    highlighted = []
+  }
+
+  clear() {
+    this.links = []
+    this.save()
+    this.updateList()
+    $("#layersInfo").val("")
+    highlighted = []
+  }
+
+  connect() {
+    let arr = []
+    for(let i in this.links) {
+      arr = arr.concat(this.links[i].ids)
+    }
+    $("#layersInfo").val(arr.join(",\n"))
+    highlighted = arr
+  }
+
+  updateList() {
+    this.$dom.empty()
+    for(let i in this.links) {
+      this.$dom.append($(`<option value="${i}">${this.links[i].name}</option>`))
+    }
+  }
+
+  clicked(e) {
+    const index = e.target.index
+    if(index === undefined) { return }
+    const text = this.links[index].ids.join(",\n")
+    $("#layersInfo").val(text)
+    highlighted = this.links[index].ids.concat()
   }
 }
 
@@ -178,6 +241,13 @@ $(document).ready(() => {
     highlighted = e.target.value.replace(/\r?\n/g, '').split(',')
     drawLinks(vertices, lines, mapBounds.getSouth() - 0.001, mapBounds.getWest() - 0.001, mapBounds.getNorth() + 0.001, mapBounds.getEast() + 0.001)
   })
+
+  listBox = new ListBox()
+  $('#btnAdd').on('click', (e) => { listBox.add(e) })
+  $('#btnDelete').on('click', (e) => { listBox.delete(e) })
+  $('#btnClear').on('click', (e) => { listBox.clear(e) })
+  $('#btnConnect').on('click', (e) => { listBox.connect(e) })
+  $('#links').on('click', (e) => { listBox.clicked(e) })
 
   $('#btnReverse').on('click', (e) => {
     highlighted = highlighted.reverse()
