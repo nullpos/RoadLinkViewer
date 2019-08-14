@@ -11,7 +11,14 @@ block content
   #mapInfoContainer
     #map
     #rightcolumn
-      button#btnReverse Reverse
+      select#links(size="5")
+      div#btnContainer
+        button#btnAdd Add
+        button#btnDelete Delete
+        button#btnClear Clear
+        button#btnConnect Connect
+        button#btnReverse Reverse
       textarea#layersInfo
 
-  script(src='/javascripts/2019linestring.js')
+  script(src='/javascripts/model.js', type="module")
+  script(src='/javascripts/2019linestring.js', type="module")
