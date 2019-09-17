@@ -24,6 +24,7 @@ function makeCHORALEQuery(semanticid, direction, option) {
   query += '          FROM    TRIPS_Doppler AS it ';
   query += '          WHERE   t.TRIP_DIRECTION = it.TRIP_DIRECTION ';
   query += '            AND   CONVERT(VARCHAR(10), t.START_TIME, 111) = CONVERT(VARCHAR(10), it.START_TIME, 111) ';
+  query += '            AND   t.DRIVER_ID = it.DRIVER_ID ';
   query += '        ) ';
   query += 'GROUP BY t.TRIP_ID ';
 
