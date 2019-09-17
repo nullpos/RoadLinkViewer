@@ -13,7 +13,8 @@ function makeCHORALEQuery(semanticid, direction, option) {
   query += '        SUM(e.ENERGY_BY_AIR_RESISTANCE) AS air_loss, ';
   query += '        SUM(e.ENERGY_BY_ROLLING_RESISTANCE) AS rolling_loss, ';
   query += '        SUM(ABS(e.REGENE_LOSS)) AS regene_loss, ';
-  query += '        SUM(ABS(e.REGENE_ENERGY)) AS regene_energy ';
+  query += '        SUM(ABS(e.REGENE_ENERGY)) AS regene_energy, ';
+  query += '        DATEPART(hour, MIN(t.START_TIME)) AS start_hour ';
   query += 'FROM    ECOLOG_Doppler AS e ';
   query += '  INNER JOIN SEMANTIC_LINKS AS sl ON e.LINK_ID = sl.LINK_ID ';
   query += '  INNER JOIN TRIPS_Doppler AS t ON e.TRIP_ID = t.TRIP_ID ';
