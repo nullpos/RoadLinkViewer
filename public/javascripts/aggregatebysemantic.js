@@ -64,6 +64,7 @@ $(document).ready(function() {
       template += '         WHERE\n';
       template += '           t.TRIP_DIRECTION = it.TRIP_DIRECTION\n';
       template += '           AND  CONVERT(VARCHAR, t.START_TIME, 111) = CONVERT(VARCHAR, it.START_TIME, 111)\n'
+      template += '           AND  t.DRIVER_ID = it.DRIVER_ID\n'
       template += '       )\n';
       template += 'GROUP BY\n';
       template += '  t.TRIP_ID';
