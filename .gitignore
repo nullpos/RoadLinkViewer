@@ -2,3 +2,4 @@
 node_modules/
 utils/*.json
 utils/test.js
+/public/javascripts/keys.js
