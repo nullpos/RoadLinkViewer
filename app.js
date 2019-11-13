@@ -7,6 +7,7 @@ var logger = require('morgan');
 let linkFetcher = require('./utils/linkFetcher.js');
 let semantics = require('./utils/semantic.js');
 let aggregater = require('./utils/aggregater');
+let place = require('./utils/place');
 let getQueryResult = require('./utils/query.js').getQueryResult;
 
 // var indexRouter = require('./routes/index');
@@ -66,6 +67,12 @@ app.get('/legacysemantic', (req, res) => {
 app.get('/aggregatebysemantic', (req, res) => {
   res.render('aggregatebysemantic', {
     title: 'Aggregate By Semantic'
+  });
+});
+
+app.get('/place', (req, res) => {
+  res.render('place', {
+    title: 'Place'
   });
 });
 
@@ -194,6 +201,12 @@ app.get('/json/othergsi/linestring/', function(req, res) {
                               function(ret) {
                                 res.json(ret);
                               });
+})
+
+app.get('/json/place/', function(req, res) {
+  place.fetchPlaceList(function(ret) {
+                        res.json(ret);
+                      });
 })
 
 app.post('/methods/createsemantic', (req, res) => {

@@ -1,0 +1,17 @@
+extends layout
+
+append stylesheet
+  link(rel='stylesheet', href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css')
+  link(rel='stylesheet', href='/stylesheets/place.css')
+
+block content
+  h1= title
+
+  #mapInfoContainer
+    #map
+    #rightcolumn
+      select#pulldown(name='place')
+
+  script(src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js', type="module")
+  script(src='/javascripts/keys.js', type="module")
+  script(src='/javascripts/place.js', type="module")
