@@ -49,6 +49,7 @@ $(document).ready(function() {
       template += '  ,SUM(e.ENERGY_BY_ROLLING_RESISTANCE) AS rolling_loss\n';
       template += '  ,SUM(ABS(e.REGENE_LOSS)) AS regene_loss\n';
       template += '  ,SUM(ABS(e.REGENE_ENERGY)) AS regene_energy\n';
+      template += '  ,DATEPART(hour, MIN(t.START_TIME)) AS start_hour\n';
       template += 'FROM\n';
       template += '  ECOLOG_Doppler AS e\n';
       template += '  INNER JOIN SEMANTIC_LINKS AS sl ON e.LINK_ID = sl.LINK_ID\n';
@@ -63,7 +64,8 @@ $(document).ready(function() {
       template += '           TRIPS_Doppler AS it\n';
       template += '         WHERE\n';
       template += '           t.TRIP_DIRECTION = it.TRIP_DIRECTION\n';
-      template += '           AND  CONVERT(VARCHAR, t.START_TIME, 111) = CONVERT(VARCHAR, it.START_TIME, 111)\n'
+      template += '           AND  CONVERT(VARCHAR, t.START_TIME, 111) = CONVERT(VARCHAR, it.START_TIME, 111)\n';
+      template += '           AND  t.DRIVER_ID = it.DRIVER_ID\n';
       template += '       )\n';
       template += 'GROUP BY\n';
       template += '  t.TRIP_ID';
