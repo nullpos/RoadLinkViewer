@@ -65,7 +65,7 @@ class LinkSearcher {
 
   search(startIdx, endIdx) {
     const edge = this.edgeLatLng
-    const fetchURL = `/json/gsi20/links/edge/?latstart=${edge.latStart}&lngstart=${edge.lngStart}&latend=${edge.latEnd}&lngend=${edge.lngEnd}`
+    const fetchURL = `${getBaseURL()}/links/edge/?latstart=${edge.latStart}&lngstart=${edge.lngStart}&latend=${edge.latEnd}&lngend=${edge.lngEnd}`
 
     fetch(fetchURL).then((response) => {
       return response.json()
@@ -207,10 +207,10 @@ class ListBox {
 }
 
 $(document).ready(() => {
-  const map = L.map('map').setView([43.46326112204825, 143.75189781188968], 17)
+  const map = L.map('map').setView([35.473876, 139.589818], 17)
   const vertices = L.layerGroup().addTo(map)
   const lines = L.layerGroup().addTo(map)
-  const zoomThreshold = 14
+  const zoomThreshold = 17
   linkSearcher = new LinkSearcher(map, lines, vertices)
 
   L.tileLayer(
@@ -256,9 +256,9 @@ $(document).ready(() => {
 })
 
 function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
-  const requestLineString = `/json/2019/linestring/?latstart=${latStart}&lngstart=${lngStart}&latend=${latEnd}&lngend=${lngEnd}`
+  const requestLineStringURL = `${getBaseURL()}/linestring/?latstart=${latStart}&lngstart=${lngStart}&latend=${latEnd}&lngend=${lngEnd}`
 
-  $.getJSON(requestLineString).done(function(data) {
+  $.getJSON(requestLineStringURL).done(function(data) {
     lines.clearLayers()
     vertices.clearLayers()
 
@@ -312,4 +312,21 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
       })
     })
   })
+}
+
+function getBaseURL() {
+  const selectedSource = document.getElementById("sourceList").value
+  let baseURL = null
+
+  if(selectedSource === "gsi20") {
+    // gsi20
+    baseURL = `/json/2019`
+  } else if(selectedSource === "legacy") {
+    // legacy
+    baseURL = `/json/legacy`
+  } else {
+    // othergsi
+    baseURL = `/json/othergsi`
+  }
+  return baseURL
 }

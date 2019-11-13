@@ -5,6 +5,11 @@ append stylesheet
 
 block content
   h1= title
+  label(for="sourceList") select an access destination: 
+  select#sourceList(name="sourceList")
+    option(value="legacy") Legacy
+    option(value="gsi20" selected) GSI20
+    option(value="othergsi" selected) Other GSI20
   #centerPoint
   #zoomValue
 

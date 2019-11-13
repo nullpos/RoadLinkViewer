@@ -100,6 +100,27 @@ app.get('/json/gsi20/links/edge/', function(req, res) {
                               });
 })
 
+app.get('/json/othergsi/links/vertex/', function(req, res) {
+  console.log(req.query.latstart + ',' + req.query.lngstart + ',' + req.query.latend + ',' + req.query.lngend);
+  linkFetcher.fetchLinksOtherGSI(req.query.latstart, 
+                              req.query.lngstart, 
+                              req.query.latend, 
+                              req.query.lngend, 
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
+app.get('/json/othergsi/links/edge/', function(req, res) {
+  linkFetcher.fetchLinksEdgeOtherGSI(req.query.latstart, 
+                              req.query.lngstart, 
+                              req.query.latend, 
+                              req.query.lngend, 
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
 app.get('/json/legacy/linestring/', function(req, res) {
   linkFetcher.fetchLineString(req.query.latstart,
                               req.query.lngstart,
@@ -157,6 +178,16 @@ app.get('/json/legacy/semantics/', function(req, res) {
 
 app.get('/json/2019/linestring/', function(req, res) {
   linkFetcher.fetch2019LineString(req.query.latstart,
+                              req.query.lngstart,
+                              req.query.latend,
+                              req.query.lngend,
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
+app.get('/json/othergsi/linestring/', function(req, res) {
+  linkFetcher.fetchOtherGSILineString(req.query.latstart,
                               req.query.lngstart,
                               req.query.latend,
                               req.query.lngend,
