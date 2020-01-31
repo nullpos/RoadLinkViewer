@@ -1,5 +1,6 @@
 import { Link } from "./model.js";
 
+let features = {}
 let highlighted = []
 
 let linkSearcher
@@ -35,19 +36,39 @@ class LinkSearcher {
       latStart: 999, latEnd: -999,
       lngStart: 999, lngEnd: -999,
     }
+    const padding = this._edgePadding(this.markers[0]._latlng.lat)
     for(let i in this.markers) {
-      const latlng = this.markers[i]._latlng
-      if(edge.latStart > latlng.lat) edge.latStart = latlng.lat - 0.1
-      if(edge.latEnd   < latlng.lat) edge.latEnd   = latlng.lat + 0.1
-      if(edge.lngStart > latlng.lng) edge.lngStart = latlng.lng - 0.1
-      if(edge.lngEnd   < latlng.lng) edge.lngEnd   = latlng.lng + 0.1
+      const coords = this.markers[i].__link_coordinates
+      for(let j=0; j<coords.length; j++) {
+        const coord = coords[j]
+        if(edge.latStart > coord[0]) edge.latStart = coord[0]
+        if(edge.latEnd   < coord[0]) edge.latEnd   = coord[0]
+        if(edge.lngStart > coord[1]) edge.lngStart = coord[1]
+        if(edge.lngEnd   < coord[1]) edge.lngEnd   = coord[1]
+      }
     }
+    edge.latStart -= padding.lat
+    edge.latEnd   += padding.lat
+    edge.lngStart -= padding.lng
+    edge.lngEnd   += padding.lng
     return edge
+  }
+
+  _edgePadding(lat) {
+    // https://groups.google.com/forum/#!topic/google-maps-js-api-v3/hDRO4oHVSeM
+    const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, this.map.getZoom())
+    const pad_m = 1000 * mpp // 1000px
+    // https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+    const pad_lat = pad_m / 111111000
+    const pad_lng = pad_m / 111111000 / Math.cos(lat * Math.PI / 180)
+    return {lat: pad_lat, lng: pad_lng}
   }
 
   add(e) {
     const linkID = e.target.attribution
     const marker = L.marker(e.latlng, {alt: linkID})
+    const linkOnMarker = features.filter((v, i, a) => { return v.properties.linkid === marker.options.alt })[0]
+    marker.__link_coordinates = linkOnMarker.geometry.coordinates
     this.markers.push(marker)
     this.linkIDs.push(linkID)
     marker.addTo(this.map)
@@ -207,7 +228,17 @@ class ListBox {
 }
 
 $(document).ready(() => {
-  const map = L.map('map').setView([35.473876, 139.589818], 17)
+  // Hokkaido
+  // const center = {'latlng': [35.3973359,139.4651749], 'zoom': 17}
+  // YNU
+  const center = {'latlng': [35.472861, 139.589168], 'zoom': 15}
+  const savedCenter = localStorage.getItem('center')
+  if(!!savedCenter) {
+    const parsed = JSON.parse(savedCenter)
+    center.latlng = parsed.latlng
+    center.zoom = parsed.zoom
+  }
+  const map = L.map('map').setView(center.latlng, center.zoom)
   const vertices = L.layerGroup().addTo(map)
   const lines = L.layerGroup().addTo(map)
   const zoomThreshold = 17
@@ -217,7 +248,8 @@ $(document).ready(() => {
     'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org/">OpenStreetMap</a>',
       minZoom: 8,
-      maxZoom: 19
+      maxZoom: 19,
+      useCache: true
     }
   ).addTo( map )
   
@@ -235,6 +267,7 @@ $(document).ready(() => {
     }
     $('#zoomValue').html(`current map zoom level is ${map.getZoom()}. If map zoom level below ${zoomThreshold}, markers will not be ploted.`)
     $('#centerPoint').html(`Center: ${mapCenter.lat}, ${mapCenter.lng}`)
+    localStorage.setItem('center', JSON.stringify({'latlng': [mapCenter.lat, mapCenter.lng], 'zoom': map.getZoom()}))
   })
 
   $('#layersInfo').on('change', (e) => {
@@ -261,8 +294,12 @@ function drawLinks(vertices, lines, latStart, lngStart, latEnd, lngEnd) {
   $.getJSON(requestLineStringURL).done(function(data) {
     lines.clearLayers()
     vertices.clearLayers()
+    features = data.features
 
     data.features.forEach(function(feature) {
+      if(!feature.geometry) {
+        return
+      }
       // add lines
       const normalColor = '#0000FF'
       const highlightColor = '#FF0000'
@@ -320,7 +357,7 @@ function getBaseURL() {
 
   if(selectedSource === "gsi20") {
     // gsi20
-    baseURL = `/json/2019`
+    baseURL = `/json/gsi20`
   } else if(selectedSource === "legacy") {
     // legacy
     baseURL = `/json/legacy`

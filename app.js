@@ -86,6 +86,16 @@ app.get('/json/legacy/edge/', function(req, res) {
                               });
 });
 
+app.get('/json/legacy/links/edge/', function(req, res) {
+  linkFetcher.fetchLinksEdgeLegacy(req.query.latstart, 
+                              req.query.lngstart, 
+                              req.query.latend, 
+                              req.query.lngend, 
+                              function(ret) {
+                                res.json(ret);
+                              });
+})
+
 app.get('/json/gsi20/links/vertex/', function(req, res) {
   console.log(req.query.latstart + ',' + req.query.lngstart + ',' + req.query.latend + ',' + req.query.lngend);
   linkFetcher.fetchLinksGSI20(req.query.latstart, 
@@ -183,7 +193,7 @@ app.get('/json/legacy/semantics/', function(req, res) {
   }
 });
 
-app.get('/json/2019/linestring/', function(req, res) {
+app.get('/json/gsi20/linestring/', function(req, res) {
   linkFetcher.fetch2019LineString(req.query.latstart,
                               req.query.lngstart,
                               req.query.latend,

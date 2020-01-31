@@ -175,6 +175,47 @@ function makeLinkEdgeFetchQueryOtherGSI(latStart, lngStart, latEnd, lngEnd) {
   return query;
 }
 
+function makeLinkFetchQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
+  // make query to get link.
+
+  let query = '';
+  query += 'SELECT * ';
+  query += 'FROM LINKS ';
+  query += 'WHERE LATITUDE BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd) + ' ';
+  query += '  AND LONGITUDE BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd) + ' ';
+  // query += '  AND SCALE = 25000 ';
+  return query;
+}
+
+function makeLinkEdgeFetchQueryLegacy(latStart, lngStart, latEnd, lngEnd) {
+  let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
+  let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
+
+  let query = '';
+  query += 'SELECT  LINKS1.LINK_ID AS LINK_ID1, ';
+  //query += '        LINKS2.LINK_ID AS LINK_ID2, ';
+  query += '        LINKS1.NUM AS NUM1, ';
+  query += '        LINKS2.NUM AS NUM2, ';
+  query += '        LINKS1.LATITUDE AS LATITUDE1, ';
+  query += '        LINKS1.LONGITUDE AS LONGITUDE1, ';
+  query += '        LINKS2.LATITUDE AS LATITUDE2, ';
+  query += '        LINKS2.LONGITUDE AS LONGITUDE2 ';
+  //query += '        LINKS2.LONGITUDE AS LONGITUDE2, ';
+  //query += '        LINKS1.SCALE AS SCALE, ';
+  //query += '        LINKS1.NODE AS NODE1, ';
+  //query += '        LINKS2.NODE AS NODE2 ';
+  query += 'FROM    LINKS AS LINKS1 ';
+  query += '  INNER JOIN LINKS AS LINKS2 ON LINKS1.LINK_ID = LINKS2.LINK_ID ';
+  query += 'WHERE   LINKS1.NUM - LINKS2.NUM = 1 ';
+  query += '  AND   LINKS1.NUM > LINKS2.NUM  ';
+  //query += '  AND   LINKS1.SCALE = LINKS2.SCALE ';
+  query += '  AND   LINKS1.LATITUDE ' + latBetweenStmt + ' ';
+  query += '  AND   LINKS1.LONGITUDE ' + lngBetweenStmt + ' ';
+  // query += '  AND   LINKS1.SCALE = 25000 '
+  console.log(query);
+  return query;
+}
+
 function makeSemanticViewQuery(latStart, lngStart, latEnd, lngEnd, semanticId) {
   let latBetweenStmt = 'BETWEEN ' + parseFloat(latStart) + ' AND ' + parseFloat(latEnd);
   let lngBetweenStmt = 'BETWEEN ' + parseFloat(lngStart) + ' AND ' + parseFloat(lngEnd);
@@ -425,6 +466,22 @@ exports.fetchLinksOtherGSI = function(latStart, lngStart, latEnd, lngEnd, callba
 
 exports.fetchLinksEdgeOtherGSI = function(latStart, lngStart, latEnd, lngEnd, callback) {
   let querystmt = makeLinkEdgeFetchQueryOtherGSI(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+    callback(result);
+  });
+}
+
+exports.fetchLinksLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeLinkFetchQueryLegacy(latStart, lngStart, latEnd, lngEnd);
+
+  getQueryResult(querystmt, function(result) {
+    callback(result);
+  });
+}
+
+exports.fetchLinksEdgeLegacy = function(latStart, lngStart, latEnd, lngEnd, callback) {
+  let querystmt = makeLinkEdgeFetchQueryLegacy(latStart, lngStart, latEnd, lngEnd);
 
   getQueryResult(querystmt, function(result) {
     callback(result);
